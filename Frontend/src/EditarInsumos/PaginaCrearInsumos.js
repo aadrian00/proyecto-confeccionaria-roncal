@@ -1,85 +1,116 @@
-import React, { useState } from 'react';
-import { Button, Form, Container, Card, ListGroup } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Button, Form, Container, ListGroup } from 'react-bootstrap';
 
 const CrearInsumosPage = () => {
-  
   const [nombre, setNombre] = useState('');
   const [cantidad, setCantidad] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [insumos, setInsumos] = useState([]);
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const nuevoInsumo = { nombre, cantidad, descripcion };
-    setInsumos([...insumos, nuevoInsumo]);
-
-    // Limpiar el formulario
-    setNombre('');
-    setCantidad('');
-    setDescripcion('');
+  // Cargar la lista de insumos desde la API
+  const fetchInsumos = async () => {
+    try {
+      const response = await fetch('https://mi-api.com/api/insumos'); // Ruta de la API
+      const data = await response.json();
+      setInsumos(data);
+    } catch (error) {
+      console.error('Error al cargar los insumos:', error);
+    }
   };
 
+  // Enviar los datos del formulario a la API
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const nuevoInsumo = { nombre, cantidad, descripcion };
+
+    try {
+      const response = await fetch('https://mi-api.com/api/insumos', { // Ruta de la API
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(nuevoInsumo),
+      });
+
+      if (response.ok) {
+        // Recargar los insumos después de agregar el nuevo
+        fetchInsumos();
+        // Limpiar el formulario
+        setNombre('');
+        setCantidad('');
+        setDescripcion('');
+      } else {
+        console.error('Error al agregar el insumo');
+      }
+    } catch (error) {
+      console.error('Error al enviar el insumo:', error);
+    }
+  };
+
+  // Usar useEffect para cargar los insumos cuando la página se monte
+  useEffect(() => {
+    fetchInsumos();
+  }, []);
+
   return (
-  <Container className="d-flex flex-column align-items-center py-5">
-  <h1 className="mb-4 text-center" style={{ color: '#333' }}>Crear Insumo</h1>
+    <Container style={{ fontFamily: 'Arial, sans-serif', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px' }}>
+      <h1 style={{ color: '#333' }}>Crear Insumo</h1>
 
-  <Form onSubmit={handleSubmit} style={{ maxWidth: '400px', width: '100%' }}>
-    <Form.Group controlId="formNombre" className="mb-3">
-      <Form.Label>Nombre del Insumo</Form.Label>
-      <Form.Control
-        type="text"
-        value={nombre}
-        onChange={(e) => setNombre(e.target.value)}
-        required
-        placeholder="Nombre del insumo"
-      />
-    </Form.Group>
+      <Form onSubmit={handleSubmit} style={{ maxWidth: '500px', width: '100%' }}>
+        <Form.Group controlId="formNombre">
+          <Form.Label style={{marginTop: '20px'}}>Nombre del Insumo</Form.Label>
+          <Form.Control
+            type="text"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            required
+            placeholder="Nombre del insumo"
+          />
+        </Form.Group>
 
-    <Form.Group controlId="formCantidad" className="mb-3">
-      <Form.Label>Cantidad</Form.Label>
-      <Form.Control
-        type="number"
-        value={cantidad}
-        onChange={(e) => setCantidad(e.target.value)}
-        required
-        placeholder="Cantidad disponible"
-      />
-    </Form.Group>
+        <Form.Group controlId="formCantidad">
+          <Form.Label style={{marginTop: '20px'}}>Cantidad</Form.Label>
+          <Form.Control
+            type="number"
+            value={cantidad}
+            onChange={(e) => setCantidad(e.target.value)}
+            required
+            placeholder="Cantidad"
+          />
+        </Form.Group>
 
-    <Form.Group controlId="formDescripcion" className="mb-3">
-      <Form.Label>Descripción</Form.Label>
-      <Form.Control
-        as="textarea"
-        value={descripcion}
-        onChange={(e) => setDescripcion(e.target.value)}
-        rows={3}
-        placeholder="Descripción del insumo"
-      />
-    </Form.Group>
+        <Form.Group controlId="formDescripcion">
+          <Form.Label style={{marginTop: '20px'}}>Descripción</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={3}
+            value={descripcion}
+            onChange={(e) => setDescripcion(e.target.value)}
+            placeholder="Descripción"
+          />
+        </Form.Group>
 
-    <Button variant="success" type="submit" className="w-100">
-      Crear Insumo
-    </Button>
-  </Form>
+        <Button variant="success" type="submit" style={{ width: '100%', marginTop: '20px' }}>
+          Crear Insumo
+        </Button>
+      </Form>
 
-  <h2 className="mt-5">Lista de Insumos</h2>
-  <div style={{ width: '100%', maxWidth: '500px' }}>
-    <Card className="mt-4">
-      <Card.Body>
-        <ListGroup>
-          {insumos.map((insumo, index) => (
-            <ListGroup.Item key={index} className="mb-2">
+      <h2 style={{marginTop: '20px' }}>Lista de Insumos</h2>
+      <ListGroup style={{ width: '100%', maxWidth: '600px'}}>
+        {insumos.length === 0 ? (
+          <ListGroup.Item>No hay insumos registrados</ListGroup.Item>
+        ) : (
+          insumos.map((insumo, index) => (
+            <ListGroup.Item key={index} style={{ marginBottom: '10px' }}>
               <strong>Nombre:</strong> {insumo.nombre} <br />
               <strong>Cantidad:</strong> {insumo.cantidad} <br />
               <strong>Descripción:</strong> {insumo.descripcion || 'N/A'}
             </ListGroup.Item>
-          ))}
-        </ListGroup>
-      </Card.Body>
-    </Card>
-  </div>
-</Container>
-);
-}
+          ))
+        )}
+      </ListGroup>
+    </Container>
+  );
+};
 
-export default CrearInsumosPage
+export default CrearInsumosPage;
