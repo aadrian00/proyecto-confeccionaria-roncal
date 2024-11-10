@@ -10,9 +10,10 @@ const CrearInsumosPage = () => {
   // Cargar la lista de insumos desde la API
   const fetchInsumos = async () => {
     try {
-      const response = await fetch('https://mi-api.com/api/insumos'); // Ruta de la API
-      const data = await response.json();
-      setInsumos(data);
+      const response = await fetch('https://5e50945f-fba5-4019-902c-bd5e2cfa4312.mock.pstmn.io/insumos'); // Ruta de la API
+      const result = await response.json();
+      console.log(result.data);
+      setInsumos(result.data || []);
     } catch (error) {
       console.error('Error al cargar los insumos:', error);
     }
@@ -22,16 +23,15 @@ const CrearInsumosPage = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const nuevoInsumo = { nombre, cantidad, descripcion };
-
     try {
-      const response = await fetch('https://mi-api.com/api/insumos', { // Ruta de la API
+      const response = await fetch('https://5e50945f-fba5-4019-902c-bd5e2cfa4312.mock.pstmn.io/LlamadaInsumosExistentes', { // Ruta de la API
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(nuevoInsumo),
       });
-
+      console.log(response.codigo);
       if (response.ok) {
         // Recargar los insumos después de agregar el nuevo
         fetchInsumos();
