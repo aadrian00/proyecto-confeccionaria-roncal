@@ -1,114 +1,143 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Form, Container, ListGroup } from 'react-bootstrap';
+import { Button, Form, Container, Alert } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 const CrearInsumosPage = () => {
   const [nombre, setNombre] = useState('');
   const [cantidad, setCantidad] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [insumos, setInsumos] = useState([]);
+  const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
-  // Cargar la lista de insumos desde la API
-  const fetchInsumos = async () => {
-    try {
-      const response = await fetch('https://5e50945f-fba5-4019-902c-bd5e2cfa4312.mock.pstmn.io/insumos'); // Ruta de la API
-      const result = await response.json();
-      console.log(result.data);
-      setInsumos(result.data || []);
-    } catch (error) {
-      console.error('Error al cargar los insumos:', error);
-    }
-  };
+  // Cargar insumos desde la API al montar el componente
+  useEffect(() => {
+    const fetchInsumos = async () => {
+      try {
+        const response = await fetch('https://5e50945f-fba5-4019-902c-bd5e2cfa4312.mock.pstmn.io/insumos');
+        const result = await response.json();
+        console.log(result.data[0].id);
+        setInsumos(result.data); // Asumiendo que los insumos están en el campo 'data'
+      } catch (error) {
+        console.error('Error al cargar los insumos:', error);
+      }
+    };
 
-  // Enviar los datos del formulario a la API
+    fetchInsumos();
+  }, []);
+
+  // Manejar la creación de un nuevo insumo
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const nuevoInsumo = { nombre, cantidad, descripcion };
     try {
-      const response = await fetch('https://5e50945f-fba5-4019-902c-bd5e2cfa4312.mock.pstmn.io/LlamadaInsumosExistentes', { // Ruta de la API
+      const response = await fetch('https://5e50945f-fba5-4019-902c-bd5e2cfa4312.mock.pstmn.io/LlamadaInsumosExistentes', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(nuevoInsumo),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, cantidad, descripcion }),
       });
-      console.log(response.codigo);
+
       if (response.ok) {
-        // Recargar los insumos después de agregar el nuevo
-        fetchInsumos();
-        // Limpiar el formulario
+        const nuevoInsumo = await response.json();
+        setInsumos([...insumos, nuevoInsumo.data]); // Añadir nuevo insumo a la lista
+        setMessage('Insumo creado con éxito.');
         setNombre('');
         setCantidad('');
         setDescripcion('');
       } else {
-        console.error('Error al agregar el insumo');
+        setMessage('Error al crear el insumo.');
       }
     } catch (error) {
-      console.error('Error al enviar el insumo:', error);
+      console.error('Error al crear el insumo:', error);
+      setMessage('Error al crear el insumo.');
     }
   };
 
-  // Usar useEffect para cargar los insumos cuando la página se monte
-  useEffect(() => {
-    fetchInsumos();
-  }, []);
+  // Manejar la eliminación de un insumo
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`https://5e50945f-fba5-4019-902c-bd5e2cfa4312.mock.pstmn.io/insumos/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setInsumos(insumos.filter((insumo) => insumo.id !== id));
+        setMessage('Insumo eliminado con éxito.');
+      } else {
+        setMessage('Error al eliminar el insumo.');
+      }
+    } catch (error) {
+      console.error('Error al eliminar el insumo:', error);
+      setMessage('Error al eliminar el insumo.');
+    }
+  };
+
+  // Redirigir a la página de edición de insumo
+  const handleEdit = (id) => {
+    navigate(`/editar-insumo/${id}`);
+  };
 
   return (
-    <Container style={{ fontFamily: 'Arial, sans-serif', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px' }}>
-      <h1 style={{ color: '#333' }}>Crear Insumo</h1>
+    <Container className="mt-5">
+      <h2 className="text-center mb-4">Crear Insumo</h2>
 
-      <Form onSubmit={handleSubmit} style={{ maxWidth: '500px', width: '100%' }}>
-        <Form.Group controlId="formNombre">
-          <Form.Label style={{marginTop: '20px'}}>Nombre del Insumo</Form.Label>
+      {message && <Alert variant="info">{message}</Alert>}
+
+      <Form onSubmit={handleSubmit}>
+        <Form.Group className="mb-3" controlId="nombre">
+          <Form.Label>Nombre del Insumo</Form.Label>
           <Form.Control
             type="text"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             required
-            placeholder="Nombre del insumo"
           />
         </Form.Group>
 
-        <Form.Group controlId="formCantidad">
-          <Form.Label style={{marginTop: '20px'}}>Cantidad</Form.Label>
+        <Form.Group className="mb-3" controlId="cantidad">
+          <Form.Label>Cantidad</Form.Label>
           <Form.Control
             type="number"
             value={cantidad}
             onChange={(e) => setCantidad(e.target.value)}
             required
-            placeholder="Cantidad"
           />
         </Form.Group>
 
-        <Form.Group controlId="formDescripcion">
-          <Form.Label style={{marginTop: '20px'}}>Descripción</Form.Label>
+        <Form.Group className="mb-3" controlId="descripcion">
+          <Form.Label>Descripción</Form.Label>
           <Form.Control
             as="textarea"
             rows={3}
             value={descripcion}
             onChange={(e) => setDescripcion(e.target.value)}
-            placeholder="Descripción"
           />
         </Form.Group>
 
-        <Button variant="success" type="submit" style={{ width: '100%', marginTop: '20px' }}>
+        <Button variant="primary" type="submit" className="w-100">
           Crear Insumo
         </Button>
       </Form>
 
-      <h2 style={{marginTop: '20px' }}>Lista de Insumos</h2>
-      <ListGroup style={{ width: '100%', maxWidth: '600px'}}>
-        {insumos.length === 0 ? (
-          <ListGroup.Item>No hay insumos registrados</ListGroup.Item>
-        ) : (
-          insumos.map((insumo, index) => (
-            <ListGroup.Item key={index} style={{ marginBottom: '10px' }}>
-              <strong>Nombre:</strong> {insumo.nombre} <br />
-              <strong>Cantidad:</strong> {insumo.cantidad} <br />
-              <strong>Descripción:</strong> {insumo.descripcion || 'N/A'}
-            </ListGroup.Item>
-          ))
-        )}
-      </ListGroup>
+      <h3 className="text-center mt-5">Lista de Insumos</h3>
+
+      {
+      insumos.map((insumo) => (
+        <div key={insumo.id} className="p-3 mb-2 border rounded d-flex justify-content-between align-items-center">
+          <div>
+            <strong>Nombre:</strong> {insumo.nombre} <br />
+            <strong>Cantidad:</strong> {insumo.cantidad} <br />
+            <strong>Descripción:</strong> {insumo.descripcion || 'N/A'}
+          </div>
+          <div>
+            <Button variant="warning" onClick={() => handleEdit(insumo.id)} className="me-2">
+              Editar
+            </Button>
+            <Button variant="danger" onClick={() => handleDelete(insumo.id)}>
+              Eliminar
+            </Button>
+          </div>
+        </div>
+      ))}
     </Container>
   );
 };

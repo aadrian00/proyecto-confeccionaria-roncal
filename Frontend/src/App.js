@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Login from './Login/login';
 import Inicio from './Inicio/inicio';
 import CrearInsumosPage from './EditarInsumos/PaginaCrearInsumos';
+import EditarInsumoPage from './EditarInsumos/PaginaEditarInsumos';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/inicio" element={<Inicio />} />
         <Route path="/crearInsumo" element={<CrearInsumosPage />}/>
+        <Route path="/editar-insumo/:id" element={<EditarInsumoPage />} />
       </Routes>
     </Router>
   );
