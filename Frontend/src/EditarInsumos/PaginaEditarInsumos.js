@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Form, Container, Alert } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
+import ConfirmModal from '../Components/ConfirmacionModal.component'; // Importar el modal reutilizable
 
 const EditarInsumoPage = () => {
   const { id } = useParams(); // Obtener el ID del insumo desde la URL
@@ -8,6 +9,7 @@ const EditarInsumoPage = () => {
   const [cantidad, setCantidad] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [message, setMessage] = useState({ text: '', type: '' });
+  const [showModal, setShowModal] = useState(false); // Estado para controlar el modal
 
   // Cargar datos del insumo al montar el componente
   useEffect(() => {
@@ -15,7 +17,6 @@ const EditarInsumoPage = () => {
       try {
         const response = await fetch(`https://5e50945f-fba5-4019-902c-bd5e2cfa4312.mock.pstmn.io/insumos/${id}`);
         const result = await response.json();
-        console.log(result);
         const insumo = result; // Suponiendo que los datos están en `data`
         setNombre(insumo.nombre);
         setCantidad(insumo.cantidad);
@@ -31,8 +32,13 @@ const EditarInsumoPage = () => {
   // Manejar la actualización del insumo
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setShowModal(true); // Mostrar el modal de confirmación
+  };
+
+  // Confirmar la actualización
+  const confirmUpdate = async () => {
     try {
-      const response = await fetch(`https://mi-api.com/api/insumos/${id}`, {
+      const response = await fetch(`https://5e50945f-fba5-4019-902c-bd5e2cfa4312.mock.pstmn.io/insumos/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nombre, cantidad, descripcion }),
@@ -47,6 +53,12 @@ const EditarInsumoPage = () => {
       console.error('Error al actualizar el insumo:', error);
       setMessage({ text: 'Error al actualizar el insumo.', type: 'danger' });
     }
+    setShowModal(false); // Cerrar el modal después de la confirmación
+  };
+
+  // Cancelar la actualización
+  const cancelUpdate = () => {
+    setShowModal(false); // Cerrar el modal sin realizar cambios
   };
 
   return (
@@ -90,8 +102,18 @@ const EditarInsumoPage = () => {
           Guardar Cambios
         </Button>
       </Form>
+
+      {/* Usando el modal reutilizable */}
+      <ConfirmModal
+        show={showModal}
+        onHide={cancelUpdate}
+        onConfirm={confirmUpdate}
+        title="Confirmar Actualización"
+        bodyText="¿Estás seguro de que deseas guardar los cambios realizados en este insumo?"
+      />
     </Container>
   );
 };
 
 export default EditarInsumoPage;
+
