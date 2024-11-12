@@ -29,12 +29,13 @@ router.get('/insumos', async (req, res) => {
 });
 
 // Ruta para obtener un insumo por su ID
-router.get('/insumos/:id', async (req, res) => {
+router.get('/insumos/:id_insumo', async (req, res) => {
   const { id_insumo } = req.params;
   try {
     const insumo = await Insumo.findByPk(id_insumo);
+    console.log(id_insumo);
     if (!insumo) {
-      return res.status(404).json({ message: 'Insumo no encontrado' });
+      return res.status(404).json({ message: "Insumo no encontrado" });
     }
     res.status(200).json(insumo);
   } catch (error) {
@@ -44,7 +45,7 @@ router.get('/insumos/:id', async (req, res) => {
 });
 
 // Ruta para actualizar un insumo
-router.put('/insumos/:id', async (req, res) => {
+router.put('/insumos/:id_insumo', async (req, res) => {
   const { id_insumo } = req.params;
   const { nombre_insumo, descripcion, stock_actual, stock_minimo } = req.body;
   try {
@@ -67,7 +68,7 @@ router.put('/insumos/:id', async (req, res) => {
 });
 
 // Ruta para eliminar un insumo
-router.delete('/insumos/:id', async (req, res) => {
+router.delete('/insumos/:id_insumo', async (req, res) => {
   const { id_insumo } = req.params;
   try {
     const insumo = await Insumo.findByPk(id_insumo);

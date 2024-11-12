@@ -2,9 +2,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const sequelize = require('./database');
 const insumosRoutes = require('./routes/insumos');
+const cors = require('cors');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = 5000;
+
+app.use(cors());
 
 // Middleware
 app.use(bodyParser.json()); // Para parsear el cuerpo de las peticiones JSON

@@ -7,6 +7,8 @@ const EditarInsumoPage = () => {
   const { id } = useParams(); // Obtener el ID del insumo desde la URL
   const [nombre, setNombre] = useState('');
   const [cantidad, setCantidad] = useState('');
+  const [stock_actual, setStockActual] = useState('');
+  const [stock_minimo, setStockMinimo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [message, setMessage] = useState({ text: '', type: '' });
   const [showModal, setShowModal] = useState(false); // Estado para controlar el modal
@@ -15,12 +17,15 @@ const EditarInsumoPage = () => {
   useEffect(() => {
     const fetchInsumo = async () => {
       try {
-        const response = await fetch(`https://5e50945f-fba5-4019-902c-bd5e2cfa4312.mock.pstmn.io/insumos/${id}`);
+        const response = await fetch(`http://localhost:5000/api/insumos/${id}`);
         const result = await response.json();
+        console.log(result);
         const insumo = result; // Suponiendo que los datos están en `data`
-        setNombre(insumo.nombre);
-        setCantidad(insumo.cantidad);
+        setNombre(insumo.nombre_insumo);
         setDescripcion(insumo.descripcion);
+        setStockActual(insumo.stock_actual);
+        setStockMinimo(insumo.stock_minimo);
+
       } catch (error) {
         console.error('Error al cargar el insumo:', error);
       }
@@ -38,10 +43,11 @@ const EditarInsumoPage = () => {
   // Confirmar la actualización
   const confirmUpdate = async () => {
     try {
-      const response = await fetch(`https://5e50945f-fba5-4019-902c-bd5e2cfa4312.mock.pstmn.io/insumos/${id}`, {
+      const nombre_insumo = nombre;
+      const response = await fetch(`http://localhost:5000/api/insumos/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre, cantidad, descripcion }),
+        body: JSON.stringify({ nombre_insumo, descripcion, stock_actual, stock_minimo }),
       });
 
       if (response.ok) {
@@ -78,16 +84,6 @@ const EditarInsumoPage = () => {
           />
         </Form.Group>
 
-        <Form.Group className="mb-3" controlId="cantidad">
-          <Form.Label>Cantidad</Form.Label>
-          <Form.Control
-            type="number"
-            value={cantidad}
-            onChange={(e) => setCantidad(e.target.value)}
-            required
-          />
-        </Form.Group>
-
         <Form.Group className="mb-3" controlId="descripcion">
           <Form.Label>Descripción</Form.Label>
           <Form.Control
@@ -95,6 +91,26 @@ const EditarInsumoPage = () => {
             rows={3}
             value={descripcion}
             onChange={(e) => setDescripcion(e.target.value)}
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3" controlId="cantidad">
+          <Form.Label>Stock Actual</Form.Label>
+          <Form.Control
+            type="number"
+            value={stock_actual}
+            onChange={(e) => setStockActual(e.target.value)}
+            required
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3" controlId="cantidad">
+          <Form.Label>Sotck Mínimo</Form.Label>
+          <Form.Control
+            type="number"
+            value={stock_minimo}
+            onChange={(e) => setStockMinimo(e.target.value)}
+            required
           />
         </Form.Group>
 
@@ -106,8 +122,8 @@ const EditarInsumoPage = () => {
       {/* Usando el modal reutilizable */}
       <ConfirmModal
         show={showModal}
-        onHide={cancelUpdate}
-        onConfirm={confirmUpdate}
+        handleClose={cancelUpdate}
+        handleConfirm={confirmUpdate}
         title="Confirmar Actualización"
         bodyText="¿Estás seguro de que deseas guardar los cambios realizados en este insumo?"
       />

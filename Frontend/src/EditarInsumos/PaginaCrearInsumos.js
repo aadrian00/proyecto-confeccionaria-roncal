@@ -5,9 +5,9 @@ import ConfirmModal from '../Components/ConfirmacionModal.component'; // Importa
 
 const CrearInsumosPage = () => {
   const [nombre, setNombre] = useState('');
-  const [id, setId] = useState();
-  const [cantidad, setCantidad] = useState('');
   const [descripcion, setDescripcion] = useState('');
+  const [stock_actual, setStockActual] = useState('');
+  const [stock_minimo, setStockMinimo] = useState('');
   const [insumos, setInsumos] = useState([]);
   const [message, setMessage] = useState('');
   const [showModal, setShowModal] = useState(false); // Estado para controlar el modal
@@ -17,10 +17,12 @@ const CrearInsumosPage = () => {
   useEffect(() => {
     const fetchInsumos = async () => {
       try {
-        const response = await fetch('https://5e50945f-fba5-4019-902c-bd5e2cfa4312.mock.pstmn.io/insumos');
+        const response = await fetch('http://localhost:5000/api/insumos');
         const result = await response.json();
-        setInsumos(result.data); // Asumiendo que los insumos están en el campo 'data'
+        setInsumos(result); // Asumiendo que los insumos están en el campo 'insumos'
+        console.log(insumos);
       } catch (error) {
+        console.log("Se está llegando aquí");
         console.error('Error al cargar los insumos:', error);
       }
     };
@@ -38,29 +40,25 @@ const CrearInsumosPage = () => {
   const confirmSubmit = async () => {
     setShowModal(false);
     try {
-      setId(6);
-      const response = await fetch('https://5e50945f-fba5-4019-902c-bd5e2cfa4312.mock.pstmn.io/LlamadaInsumosExistentes', {
+      const nombre_insumo = nombre;
+      const response = await fetch('http://localhost:5000/api/insumos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, nombre, cantidad, descripcion }),
+        body: JSON.stringify({ nombre_insumo, descripcion, stock_actual, stock_minimo }),
       });
 
       if (response.ok) {
         setNombre('');
-        setCantidad('');
         setDescripcion('');
+        setStockActual('');
+        setStockMinimo('');
         setMessage('Insumo creado con éxito.');
 
-         // Actualiza la lista de insumos recargando la data
-        const fetchInsumos = async () => {
-        const response = await fetch('https://5e50945f-fba5-4019-902c-bd5e2cfa4312.mock.pstmn.io/insumos');
-        const result = await response.json();
-        setInsumos(result.data);  // Recargar la lista de insumos desde la API
-      };
-
-      fetchInsumos();
-    }
-       else {
+        // Actualiza la lista de insumos recargando la data
+        const updatedInsumos = await response.json();
+        console.log("Esta es la respuesta que me está dando", updatedInsumos);
+        setInsumos(prevInsumos => [...prevInsumos, updatedInsumos.insumo]);  // Recargar la lista de insumos desde la API
+      } else {
         setMessage('Error al crear el insumo.');
       }
     } catch (error) {
@@ -72,17 +70,19 @@ const CrearInsumosPage = () => {
   // Manejar la eliminación de un insumo
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`https://5e50945f-fba5-4019-902c-bd5e2cfa4312.mock.pstmn.io/insumos/${id}`, {
+      const response = await fetch(`http://localhost:5000/api/insumos/${id}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
-        setInsumos(insumos.filter((insumo) => insumo.id !== id));
+        // Actualiza la lista de insumos después de eliminar uno
+        setInsumos(insumos.filter((insumo) => insumo.id_insumo !== id));
         setMessage('Insumo eliminado con éxito.');
       } else {
         setMessage('Error al eliminar el insumo.');
       }
     } catch (error) {
+      console.log(id);
       console.error('Error al eliminar el insumo:', error);
       setMessage('Error al eliminar el insumo.');
     }
@@ -110,16 +110,6 @@ const CrearInsumosPage = () => {
           />
         </Form.Group>
 
-        <Form.Group className="mb-3" controlId="cantidad">
-          <Form.Label>Cantidad</Form.Label>
-          <Form.Control
-            type="number"
-            value={cantidad}
-            onChange={(e) => setCantidad(e.target.value)}
-            required
-          />
-        </Form.Group>
-
         <Form.Group className="mb-3" controlId="descripcion">
           <Form.Label>Descripción</Form.Label>
           <Form.Control
@@ -127,6 +117,26 @@ const CrearInsumosPage = () => {
             rows={3}
             value={descripcion}
             onChange={(e) => setDescripcion(e.target.value)}
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3" controlId="cantidad">
+          <Form.Label>Stock Actual</Form.Label>
+          <Form.Control
+            type="number"
+            value={stock_actual}
+            onChange={(e) => setStockActual(e.target.value)}
+            required
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3" controlId="cantidad">
+          <Form.Label>Stock Mínimo</Form.Label>
+          <Form.Control
+            type="number"
+            value={stock_minimo}
+            onChange={(e) => setStockMinimo(e.target.value)}
+            required
           />
         </Form.Group>
 
@@ -138,17 +148,17 @@ const CrearInsumosPage = () => {
       <h3 className="text-center mt-5">Lista de Insumos</h3>
 
       {insumos.map((insumo) => (
-        <div key={insumo.id} className="p-3 mb-2 border rounded d-flex justify-content-between align-items-center">
+        <div key={insumo.id_insumo} className="p-3 mb-2 border rounded d-flex justify-content-between align-items-center">
           <div>
-            <strong>Nombre:</strong> {insumo.nombre} <br />
-            <strong>Cantidad:</strong> {insumo.cantidad} <br />
+            <strong>Nombre:</strong> {insumo.nombre_insumo} <br />
+            <strong>Stock Actual:</strong> {insumo.stock_actual} <br />
             <strong>Descripción:</strong> {insumo.descripcion || 'N/A'}
           </div>
           <div>
-            <Button variant="warning" onClick={() => handleEdit(insumo.id)} className="me-2">
+            <Button variant="warning" onClick={() => handleEdit(insumo.id_insumo)} className="me-2">
               Editar
             </Button>
-            <Button variant="danger" onClick={() => handleDelete(insumo.id)}>
+            <Button variant="danger" onClick={() => handleDelete(insumo.id_insumo)}>
               Eliminar
             </Button>
           </div>
