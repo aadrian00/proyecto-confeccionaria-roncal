@@ -132,4 +132,3 @@ const EditarInsumoPage = () => {
 };
 
 export default EditarInsumoPage;
-
