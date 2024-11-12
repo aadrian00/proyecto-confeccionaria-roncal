@@ -151,8 +151,10 @@ const CrearInsumosPage = () => {
         <div key={insumo.id_insumo} className="p-3 mb-2 border rounded d-flex justify-content-between align-items-center">
           <div>
             <strong>Nombre:</strong> {insumo.nombre_insumo} <br />
+            <strong>Descripción:</strong> {insumo.descripcion || 'N/A'} <br />
             <strong>Stock Actual:</strong> {insumo.stock_actual} <br />
-            <strong>Descripción:</strong> {insumo.descripcion || 'N/A'}
+            <strong>Stock Minimo:</strong> {insumo.stock_minimo} <br />
+
           </div>
           <div>
             <Button variant="warning" onClick={() => handleEdit(insumo.id_insumo)} className="me-2">
