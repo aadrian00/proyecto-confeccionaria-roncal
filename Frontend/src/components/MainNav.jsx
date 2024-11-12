@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 
 function MainNav() {
   const navItems = [
-    { texto: "Insumos", ruta:"/insumos"},
+    { texto: "Insumos", ruta:"/crearInsumo"},
     { texto: "Histórico", ruta: "/historico"},
     { texto: "Reporte Semanal", ruta: "/reporte"}
   ]

@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Form, Container, Alert } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
-import ConfirmModal from '../Components/ConfirmacionModal.component'; // Importar el modal reutilizable
 
 const EditarInsumoPage = () => {
   const { id } = useParams(); // Obtener el ID del insumo desde la URL
@@ -62,56 +60,89 @@ const EditarInsumoPage = () => {
   };
 
   return (
-    <Container className="mt-5">
+    <div className="container mt-5">
       <h2 className="text-center mb-4">Editar Insumo</h2>
 
-      {message.text && <Alert variant={message.type}>{message.text}</Alert>}
+      {message.text && (
+        <div className={`alert alert-${message.type}`} role="alert">
+          {message.text}
+        </div>
+      )}
 
-      <Form onSubmit={handleSubmit}>
-        <Form.Group className="mb-3" controlId="nombre">
-          <Form.Label>Nombre del Insumo</Form.Label>
-          <Form.Control
+      <form onSubmit={handleSubmit}>
+        <div className="mb-3">
+          <label htmlFor="nombre" className="form-label">
+            Nombre del Insumo
+          </label>
+          <input
             type="text"
+            className="form-control"
+            id="nombre"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             required
           />
-        </Form.Group>
+        </div>
 
-        <Form.Group className="mb-3" controlId="cantidad">
-          <Form.Label>Cantidad</Form.Label>
-          <Form.Control
+        <div className="mb-3">
+          <label htmlFor="cantidad" className="form-label">
+            Cantidad
+          </label>
+          <input
             type="number"
+            className="form-control"
+            id="cantidad"
             value={cantidad}
             onChange={(e) => setCantidad(e.target.value)}
             required
           />
-        </Form.Group>
+        </div>
 
-        <Form.Group className="mb-3" controlId="descripcion">
-          <Form.Label>Descripción</Form.Label>
-          <Form.Control
-            as="textarea"
-            rows={3}
+        <div className="mb-3">
+          <label htmlFor="descripcion" className="form-label">
+            Descripción
+          </label>
+          <textarea
+            className="form-control"
+            id="descripcion"
+            rows="3"
             value={descripcion}
             onChange={(e) => setDescripcion(e.target.value)}
           />
-        </Form.Group>
+        </div>
 
-        <Button variant="primary" type="submit" className="w-100">
+        <button type="submit" className="btn btn-primary w-100">
           Guardar Cambios
-        </Button>
-      </Form>
+        </button>
+      </form>
 
       {/* Usando el modal reutilizable */}
-      <ConfirmModal
-        show={showModal}
-        onHide={cancelUpdate}
-        onConfirm={confirmUpdate}
-        title="Confirmar Actualización"
-        bodyText="¿Estás seguro de que deseas guardar los cambios realizados en este insumo?"
-      />
-    </Container>
+      <div
+        className={`modal fade ${showModal ? "show" : ""}`}
+        style={{ display: showModal ? "block" : "none" }}
+        role="dialog"
+      >
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Confirmar Actualización</h5>
+              <button type="button" className="btn-close" onClick={cancelUpdate}></button>
+            </div>
+            <div className="modal-body">
+              <p>¿Estás seguro de que deseas guardar los cambios realizados en este insumo?</p>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={cancelUpdate}>
+                Cancelar
+              </button>
+              <button type="button" className="btn btn-primary" onClick={confirmUpdate}>
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

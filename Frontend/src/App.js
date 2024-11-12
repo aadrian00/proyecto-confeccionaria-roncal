@@ -6,8 +6,9 @@ import MainNav from './components/MainNav';
 import Login from './Login/login';
 import Inicio from './Pages/inicio';
 import Reporte from './Pages/Reporte';
-import CrearInsumosPage from './EditarInsumos/PaginaCrearInsumos';
-import EditarInsumoPage from './EditarInsumos/PaginaEditarInsumos';
+import CrearInsumosPage from './Pages/PaginaCrearInsumos';
+import EditarInsumoPage from './Pages/PaginaEditarInsumos';
+import Historico from './Pages/Historico';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/inicio" element={<Inicio />} />
         <Route path="/reporte" element={<Reporte />} />
+        <Route path="/historico" element={<Historico />} />
         <Route path="/crearInsumo" element={<CrearInsumosPage />}/>
         <Route path="/editar-insumo/:id" element={<EditarInsumoPage />} />
       </Routes>

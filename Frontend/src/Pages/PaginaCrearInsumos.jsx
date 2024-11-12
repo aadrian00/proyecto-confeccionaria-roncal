@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Form, Container, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import ConfirmModal from '../Components/ConfirmacionModal.component'; // Importar el modal
 
 const CrearInsumosPage = () => {
   const [nombre, setNombre] = useState('');
@@ -94,75 +92,129 @@ const CrearInsumosPage = () => {
   };
 
   return (
-    <Container className="mt-5">
+    <div className="container mt-5">
       <h2 className="text-center mb-4">Crear Insumo</h2>
 
-      {message && <Alert variant="info">{message}</Alert>}
+      {message && (
+        <div className="alert alert-info" role="alert">
+          {message}
+        </div>
+      )}
 
-      <Form onSubmit={handleShowModal}>
-        <Form.Group className="mb-3" controlId="nombre">
-          <Form.Label>Nombre del Insumo</Form.Label>
-          <Form.Control
+      <form onSubmit={handleShowModal}>
+        <div className="mb-3">
+          <label htmlFor="nombre" className="form-label">
+            Nombre del Insumo
+          </label>
+          <input
             type="text"
+            className="form-control"
+            id="nombre"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             required
           />
-        </Form.Group>
+        </div>
 
-        <Form.Group className="mb-3" controlId="cantidad">
-          <Form.Label>Cantidad</Form.Label>
-          <Form.Control
+        <div className="mb-3">
+          <label htmlFor="cantidad" className="form-label">
+            Cantidad
+          </label>
+          <input
             type="number"
+            className="form-control"
+            id="cantidad"
             value={cantidad}
             onChange={(e) => setCantidad(e.target.value)}
             required
           />
-        </Form.Group>
+        </div>
 
-        <Form.Group className="mb-3" controlId="descripcion">
-          <Form.Label>Descripción</Form.Label>
-          <Form.Control
-            as="textarea"
-            rows={3}
+        <div className="mb-3">
+          <label htmlFor="descripcion" className="form-label">
+            Descripción
+          </label>
+          <textarea
+            className="form-control"
+            id="descripcion"
+            rows="3"
             value={descripcion}
             onChange={(e) => setDescripcion(e.target.value)}
           />
-        </Form.Group>
+        </div>
 
-        <Button variant="primary" type="submit" className="w-100">
+        <button type="submit" className="btn btn-primary w-100">
           Crear Insumo
-        </Button>
-      </Form>
+        </button>
+      </form>
 
       <h3 className="text-center mt-5">Lista de Insumos</h3>
 
       {insumos.map((insumo) => (
-        <div key={insumo.id} className="p-3 mb-2 border rounded d-flex justify-content-between align-items-center">
+        <div
+          key={insumo.id}
+          className="p-3 mb-2 border rounded d-flex justify-content-between align-items-center"
+        >
           <div>
             <strong>Nombre:</strong> {insumo.nombre} <br />
             <strong>Cantidad:</strong> {insumo.cantidad} <br />
             <strong>Descripción:</strong> {insumo.descripcion || 'N/A'}
           </div>
           <div>
-            <Button variant="warning" onClick={() => handleEdit(insumo.id)} className="me-2">
+            <button
+              className="btn btn-warning me-2"
+              onClick={() => handleEdit(insumo.id)}
+            >
               Editar
-            </Button>
-            <Button variant="danger" onClick={() => handleDelete(insumo.id)}>
+            </button>
+            <button
+              className="btn btn-danger"
+              onClick={() => handleDelete(insumo.id)}
+            >
               Eliminar
-            </Button>
+            </button>
           </div>
         </div>
       ))}
 
-      <ConfirmModal
-        show={showModal}
-        handleClose={() => setShowModal(false)}
-        handleConfirm={confirmSubmit}
-        title="Confirmación de Creación"
-        bodyText="¿Está seguro de que desea crear este insumo?"
-      />
-    </Container>
+      <div
+        className={`modal fade ${showModal ? "show" : ""}`}
+        style={{ display: showModal ? "block" : "none" }}
+        role="dialog"
+      >
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Confirmación de Creación</h5>
+              <button
+                type="button"
+                className="btn-close"
+                onClick={() => setShowModal(false)}
+              ></button>
+            </div>
+            <div className="modal-body">
+              <p>¿Está seguro de que desea crear este insumo?</p>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setShowModal(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={confirmSubmit}
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
