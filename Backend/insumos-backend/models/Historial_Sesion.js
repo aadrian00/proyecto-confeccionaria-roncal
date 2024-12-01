@@ -7,12 +7,12 @@ const db = new sqlite3.Database("./database.sqlite", (err) => {
   }
 });
 
-db.run(`CREATE TABLE Insumo (
-    id_insumo INTEGER PRIMARY KEY AUTOINCREMENT,
-    nombre_insumo TEXT NOT NULL,
-    descripcion TEXT,
-    stock_actual INTEGER NOT NULL,
-    stock_minimo INTEGER NOT NULL
+db.run(`CREATE TABLE Historial_Sesion (
+    id_historial_sesion INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_usuario INTEGER NOT NULL,
+    fecha_inicio DATETIME NOT NULL,
+    fecha_cierre DATETIME,
+    FOREIGN KEY (id_usuario) REFERENCES Usuario (id_usuario)
 )`);
 
 module.exports = db;

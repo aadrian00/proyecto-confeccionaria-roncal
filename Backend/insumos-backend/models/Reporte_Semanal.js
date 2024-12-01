@@ -7,12 +7,12 @@ const db = new sqlite3.Database("./database.sqlite", (err) => {
   }
 });
 
-db.run(`CREATE TABLE Insumo (
-    id_insumo INTEGER PRIMARY KEY AUTOINCREMENT,
-    nombre_insumo TEXT NOT NULL,
-    descripcion TEXT,
-    stock_actual INTEGER NOT NULL,
-    stock_minimo INTEGER NOT NULL
+db.run(`CREATE TABLE Reporte_Semanal (
+    id_reporte INTEGER PRIMARY KEY AUTOINCREMENT,
+    fecha_inicio DATE NOT NULL,
+    fecha_fin DATE NOT NULL,
+    total_consumo INTEGER NOT NULL,
+    costo_total REAL NOT NULL
 )`);
 
 module.exports = db;
