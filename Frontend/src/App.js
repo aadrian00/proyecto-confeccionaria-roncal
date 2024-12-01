@@ -3,8 +3,8 @@ import 'bootstrap/dist/js/bootstrap.bundle.js'
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import MainNav from './Components/MainNav';
-import Login from './Login/login';
-import Inicio from './Pages/inicio';
+import Login from "./Components/Login";
+import Inicio from './Pages/Inicio';
 import Reporte from './Pages/Reporte';
 import CrearInsumosPage from './Pages/PaginaCrearInsumos';
 import EditarInsumoPage from './Pages/PaginaEditarInsumos';

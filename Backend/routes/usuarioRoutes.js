@@ -10,10 +10,10 @@ db.all para SELECT
 
 // Crear un usuario
 router.post("/", (req, res) => {
-    const { nombre, email, contraseña } = req.body;
+    const { nombre, email, contrasena } = req.body;
     db.run(
-        "INSERT INTO Usuario (nombre, email, contraseña) VALUES (?, ?, ?)",
-        [nombre, email, contraseña],
+        "INSERT INTO Usuario (nombre, email, contrasena) VALUES (?, ?, ?)",
+        [nombre, email, contrasena],
         function (err) {
             if (err) {
                 res.status(400).json({ error: err.message });
@@ -53,11 +53,11 @@ router.get("/:id_usuario", (req, res) => {
 
 // Actualizar un usuario
 router.put("/:id_usuario", (req, res) => {
-    const { nombre, email, contraseña } = req.body;
+    const { nombre, email, contrasena } = req.body;
     const { id_usuario } = req.params;
     db.run(
-        "UPDATE Usuario SET nombre = ?, email = ?, contraseña = ? WHERE id_usuario = ?",
-        [nombre, email, contraseña, id_usuario],
+        "UPDATE Usuario SET nombre = ?, email = ?, contrasena = ? WHERE id_usuario = ?",
+        [nombre, email, contrasena, id_usuario],
         function (err) {
             if (err) {
                 res.status(400).json({ error: err.message });

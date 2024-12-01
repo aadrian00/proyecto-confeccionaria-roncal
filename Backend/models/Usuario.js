@@ -11,7 +11,7 @@ db.run(`CREATE TABLE IF NOT EXISTS Usuario (
     id_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
     nombre TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
-    contraseña TEXT NOT NULL
+    contrasena TEXT NOT NULL
 );
 )`);
 
