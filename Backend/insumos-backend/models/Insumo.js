@@ -22,6 +22,10 @@ const Insumo = sequelize.define('Insumo', {
   stock_minimo: {
     type: DataTypes.INTEGER,
     allowNull: false,
+  },
+  notificado: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
   }
 }, {
   tableName: 'Insumo', // Nombre de la tabla en la base de datos
