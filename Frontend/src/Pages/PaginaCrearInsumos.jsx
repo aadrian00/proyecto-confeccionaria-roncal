@@ -77,10 +77,11 @@ const CrearInsumosPage = () => {
   // Manejar la eliminación de un insumo
   const handleDelete = async (id) => {
     let email = localStorage.getItem('email'); // El email también debe estar guardado
+    console.log(email);
     try {
       const response = await fetch(`http://localhost:5000/api/insumos/${id}`, {
         method: 'DELETE',
-        body: JSON.stringify({ email: email }),
+        body: JSON.stringify({ email }),
       });
 
       if (response.ok) {

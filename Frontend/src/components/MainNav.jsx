@@ -28,7 +28,8 @@ function MainNav() {
     // Esto va a escuchar cambios en el localStorage directamente
     const interval = setInterval(() => {
       const token = localStorage.getItem('access_token');
-      if (token) {
+      const token1 = localStorage.getItem('authToken');
+      if (token || token1) {
         setIsAuthenticated(true); // El token existe
       } else {
         setIsAuthenticated(false); // El token no existe
@@ -44,6 +45,7 @@ function MainNav() {
   const cerrarSesion = () => {
      // Elimina el token del localStorage (o sessionStorage, dependiendo de donde lo guardes)
      localStorage.removeItem('access_token');
+     localStorage.removeItem('authToken')
      localStorage.removeItem('email');
   
      setIsAuthenticated(false);
