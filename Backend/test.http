@@ -1,0 +1,37 @@
+### Obtener todos los usuarios
+GET http://localhost:3001/usuarios
+Content-Type: application/json
+
+
+### NOTA: SER PRECISO CON LOS TIPOS DE USUARIO CONTANDO MINUSCULAS
+
+POST http://localhost:3001/usuarios
+Content-Type: application/json
+
+{
+  "nombre": "Juan Perez",
+  "email": "juan.pesez@example.com",
+  "contrasena": "dgwi130"
+}
+
+POST http://localhost:3001/usuarios
+Content-Type: application/json
+
+{
+  "nombre": "Gabriel Diaz",
+  "email": "gab.dz@example.com",
+  "contrasena": "argh1234"
+}
+
+
+POST http://localhost:3001/usuarios
+Content-Type: application/json
+
+{
+  "nombre": "Daniel Cardenas",
+  "email": "dani.crd@example.com",
+  "contrasena": "paciente123"
+}
+
+
+
