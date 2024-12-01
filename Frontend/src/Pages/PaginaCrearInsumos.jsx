@@ -22,9 +22,9 @@ const CrearInsumosPage = () => {
       let email = localStorage.getItem('email'); // El email también debe estar guardado
       console.log(email);
       try {
-        const response = await fetch('http://localhost:5000/api/insumos')
+        const response = await fetch('http://localhost:5000/Insumo')
         const result = await response.json();
-        setInsumos(result); // Asumiendo que los insumos están en el campo 'insumos'
+        setInsumos(result.data); // Asumiendo que los insumos están en el campo 'insumos'
       } catch (error) {
         console.log("Se está llegando aquí");
         console.error('Error al cargar los insumos:', error);
@@ -48,10 +48,11 @@ const CrearInsumosPage = () => {
     setShowModal(false);
     try {
       const nombre_insumo = nombre;
-      const response = await fetch('http://localhost:5000/api/insumos', {
+      console.log(nombre_insumo);
+      const response = await fetch('http://localhost:5000/Insumo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json'         },
-        body: JSON.stringify({ nombre_insumo, descripcion, stock_actual, stock_minimo, email }),
+        body: JSON.stringify({ nombre_insumo, descripcion, stock_actual, stock_minimo }),
       });
 
       if (response.ok) {
@@ -62,9 +63,11 @@ const CrearInsumosPage = () => {
         setMessage('Insumo creado con éxito.');
 
         // Actualiza la lista de insumos recargando la data
-        const updatedInsumos = await response.json();
+        const updatedInsumos = { nombre_insumo, descripcion, stock_actual, stock_minimo };
+        console.log(updatedInsumos);
         console.log("Esta es la respuesta que me está dando", updatedInsumos);
-        setInsumos(prevInsumos => [...prevInsumos, updatedInsumos.insumo]);  // Recargar la lista de insumos desde la API
+        setInsumos(prevInsumos => [...prevInsumos, updatedInsumos]);  // Recargar la lista de insumos desde la API
+        console.log(insumos);
       } else {
         setMessage('Error al crear el insumo.');
       }
@@ -79,7 +82,7 @@ const CrearInsumosPage = () => {
     let email = localStorage.getItem('email'); // El email también debe estar guardado
     console.log(email);
     try {
-      const response = await fetch(`http://localhost:5000/api/insumos/${id}`, {
+      const response = await fetch(`http://localhost:5000/Insumo/${id}`, {
         method: 'DELETE',
         body: JSON.stringify({ email }),
       });
@@ -157,25 +160,28 @@ const CrearInsumosPage = () => {
 
       <h3 className="text-center mt-5">Lista de Insumos</h3>
 
-      {insumos.map((insumo) => (
-        <div key={insumo.id_insumo} className="p-3 mb-2 border rounded d-flex justify-content-between align-items-center">
-          <div>
-            <strong>Nombre:</strong> {insumo.nombre_insumo} <br />
-            <strong>Descripción:</strong> {insumo.descripcion || 'N/A'} <br />
-            <strong>Stock Actual:</strong> {insumo.stock_actual} <br />
-            <strong>Stock Minimo:</strong> {insumo.stock_minimo} <br />
-
-          </div>
-          <div>
-            <Button variant="warning" onClick={() => handleEdit(insumo.id_insumo)} className="me-2">
-              Editar
-            </Button>
-            <Button variant="danger" onClick={() => handleDelete(insumo.id_insumo)}>
-              Eliminar
-            </Button>
-          </div>
-        </div>
-      ))}
+      {insumos.length === 0 ? (
+            <p>No hay insumos</p>  // Si no hay insumos, mostrar este mensaje
+          ) : (
+            insumos.map((insumo) => (
+              <div key={insumo.id_insumo} className="p-3 mb-2 border rounded d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>Nombre:</strong> {insumo.nombre_insumo} <br />
+                  <strong>Descripción:</strong> {insumo.descripcion || 'N/A'} <br />
+                  <strong>Stock Actual:</strong> {insumo.stock_actual} <br />
+                  <strong>Stock Minimo:</strong> {insumo.stock_minimo} <br />
+                </div>
+                <div>
+                  <Button variant="warning" onClick={() => handleEdit(insumo.id_insumo)} className="me-2">
+                    Editar
+                  </Button>
+                  <Button variant="danger" onClick={() => handleDelete(insumo.id_insumo)}>
+                    Eliminar
+                  </Button>
+                </div>
+              </div>
+              ))
+              )}
 
       <ConfirmModal
         show={showModal}

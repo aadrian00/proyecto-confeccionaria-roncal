@@ -24,10 +24,10 @@ const EditarInsumoPage = () => {
   useEffect(() => {
     const fetchInsumo = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/insumos/${id}`);
+        const response = await fetch(`http://localhost:5000/Insumo/${id}`);
         const result = await response.json();
         console.log(result);
-        const insumo = result; // Suponiendo que los datos están en `data`
+        const insumo = result.data; // Suponiendo que los datos están en `data`
         setNombre(insumo.nombre_insumo);
         setDescripcion(insumo.descripcion);
         setStockActual(insumo.stock_actual);
@@ -51,7 +51,7 @@ const EditarInsumoPage = () => {
   const confirmUpdate = async () => {
     try {
       const nombre_insumo = nombre;
-      const response = await fetch(`http://localhost:5000/api/insumos/${id}`, {
+      const response = await fetch(`http://localhost:5000/Insumo/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json',
          },

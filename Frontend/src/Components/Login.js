@@ -12,7 +12,7 @@ function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post("http://localhost:3001/login", {
+            const response = await axios.post("http://localhost:5000/login", {
                 email,
                 contrasena: password, // Cambiado a "contrasena" sin la ñ
             });
@@ -27,6 +27,11 @@ function Login() {
             }
         }
     };
+
+    const onClick = async () => {
+        window.location.href = 'http://localhost:5000/login-google';
+    };
+
 
     return (
         <div className="container mt-5">
@@ -68,6 +73,11 @@ function Login() {
                                     <button type="submit" className="btn btn-primary">
                                         Iniciar Sesión
                                     </button>
+                                </div>
+                                <div className="text-center mt-4">
+                                <button onClick={onClick}>
+                                    Iniciar Sesión con Google
+                                </button>
                                 </div>
                             </form>
                             {message && (
