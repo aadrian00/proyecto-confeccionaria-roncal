@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Form, Container, Alert } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import ConfirmModal from '../Components/ConfirmacionModal.component'; // Importar el modal reutilizable
+import { useNavigate } from 'react-router-dom';
 
 const EditarInsumoPage = () => {
   const { id } = useParams(); // Obtener el ID del insumo desde la URL
@@ -12,6 +13,12 @@ const EditarInsumoPage = () => {
   const [descripcion, setDescripcion] = useState('');
   const [message, setMessage] = useState({ text: '', type: '' });
   const [showModal, setShowModal] = useState(false); // Estado para controlar el modal
+
+
+  const token = localStorage.getItem('access_token');
+  const email = localStorage.getItem('email');
+
+  const navigate = useNavigate();
 
   // Cargar datos del insumo al montar el componente
   useEffect(() => {
@@ -46,8 +53,9 @@ const EditarInsumoPage = () => {
       const nombre_insumo = nombre;
       const response = await fetch(`http://localhost:5000/api/insumos/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre_insumo, descripcion, stock_actual, stock_minimo }),
+        headers: { 'Content-Type': 'application/json',
+         },
+        body: JSON.stringify({ nombre_insumo, descripcion, stock_actual, stock_minimo, email}),
       });
 
       if (response.ok) {
@@ -59,6 +67,7 @@ const EditarInsumoPage = () => {
       console.error('Error al actualizar el insumo:', error);
       setMessage({ text: 'Error al actualizar el insumo.', type: 'danger' });
     }
+    navigate('/crearInsumo');
     setShowModal(false); // Cerrar el modal después de la confirmación
   };
 

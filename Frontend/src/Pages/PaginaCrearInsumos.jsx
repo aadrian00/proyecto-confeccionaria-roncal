@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Button, Form, Container, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import ConfirmModal from '../Components/ConfirmacionModal.component'; // Importar el modal
+import { jwtDecode as jwt_decode } from 'jwt-decode';
+
 
 const CrearInsumosPage = () => {
   const [nombre, setNombre] = useState('');
@@ -13,14 +15,16 @@ const CrearInsumosPage = () => {
   const [showModal, setShowModal] = useState(false); // Estado para controlar el modal
   const navigate = useNavigate();
 
+
   // Cargar insumos desde la API al montar el componente
   useEffect(() => {
     const fetchInsumos = async () => {
+      let email = localStorage.getItem('email'); // El email también debe estar guardado
+      console.log(email);
       try {
-        const response = await fetch('http://localhost:5000/api/insumos');
+        const response = await fetch('http://localhost:5000/api/insumos')
         const result = await response.json();
         setInsumos(result); // Asumiendo que los insumos están en el campo 'insumos'
-        console.log(insumos);
       } catch (error) {
         console.log("Se está llegando aquí");
         console.error('Error al cargar los insumos:', error);
@@ -30,6 +34,8 @@ const CrearInsumosPage = () => {
     fetchInsumos();
   }, []);
 
+  console.log(insumos);
+
   // Mostrar el modal antes de confirmar la creación
   const handleShowModal = (event) => {
     event.preventDefault();
@@ -38,13 +44,14 @@ const CrearInsumosPage = () => {
 
   // Confirmar y enviar los datos a la API
   const confirmSubmit = async () => {
+    let email = localStorage.getItem('email'); // El email también debe estar guardado
     setShowModal(false);
     try {
       const nombre_insumo = nombre;
       const response = await fetch('http://localhost:5000/api/insumos', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre_insumo, descripcion, stock_actual, stock_minimo }),
+        headers: { 'Content-Type': 'application/json'         },
+        body: JSON.stringify({ nombre_insumo, descripcion, stock_actual, stock_minimo, email }),
       });
 
       if (response.ok) {
@@ -69,9 +76,11 @@ const CrearInsumosPage = () => {
 
   // Manejar la eliminación de un insumo
   const handleDelete = async (id) => {
+    let email = localStorage.getItem('email'); // El email también debe estar guardado
     try {
       const response = await fetch(`http://localhost:5000/api/insumos/${id}`, {
         method: 'DELETE',
+        body: JSON.stringify({ email: email }),
       });
 
       if (response.ok) {
