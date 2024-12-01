@@ -7,7 +7,7 @@ const db = new sqlite3.Database("./database.sqlite", (err) => {
   }
 });
 
-db.run(`CREATE TABLE Reporte_Semanal (
+db.run(`CREATE TABLE IF NOT EXISTS Reporte_Semanal (
     id_reporte INTEGER PRIMARY KEY AUTOINCREMENT,
     fecha_inicio DATE NOT NULL,
     fecha_fin DATE NOT NULL,

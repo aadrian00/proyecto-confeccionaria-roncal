@@ -7,15 +7,15 @@ const db = new sqlite3.Database("./database.sqlite", (err) => {
   }
 });
 
-db.run(`CREATE TABLE Historial_Insumo (
-    id_historial_insumo INTEGER PRIMARY KEY AUTOINCREMENT,
-    id_insumo INTEGER NOT NULL,
+db.run(`CREATE TABLE IF NOT EXISTS Notificaciones (
+    id_notificacion INTEGER PRIMARY KEY AUTOINCREMENT,
     id_usuario INTEGER NOT NULL,
-    cantidad INTEGER NOT NULL,
-    tipo_movimiento TEXT CHECK (tipo_movimiento IN ('ingreso', 'egreso')),
+    id_insumo INTEGER NOT NULL,
+    mensaje TEXT NOT NULL,
     fecha DATETIME NOT NULL,
-    FOREIGN KEY (id_insumo) REFERENCES Insumo (id_insumo),
-    FOREIGN KEY (id_usuario) REFERENCES Usuario (id_usuario)
+    estado TEXT CHECK (estado IN ('leída', 'no leída')),
+    FOREIGN KEY (id_usuario) REFERENCES Usuario (id_usuario),
+    FOREIGN KEY (id_insumo) REFERENCES Insumo (id_insumo)
 )`);
 
 module.exports = db;

@@ -7,13 +7,13 @@ const db = new sqlite3.Database("./database.sqlite", (err) => {
   }
 });
 
-db.run(`CREATE TABLE Notificaciones (
-    id_notificacion INTEGER PRIMARY KEY AUTOINCREMENT,
+db.run(`CREATE TABLE IF NOT EXISTS Alertas (
+    id_alerta INTEGER PRIMARY KEY AUTOINCREMENT,
     id_usuario INTEGER NOT NULL,
     id_insumo INTEGER NOT NULL,
-    mensaje TEXT NOT NULL,
-    fecha DATETIME NOT NULL,
-    estado TEXT CHECK (estado IN ('leída', 'no leída')),
+    tipo_alerta TEXT NOT NULL,
+    umbral INTEGER NOT NULL,
+    frecuencia TEXT NOT NULL,
     FOREIGN KEY (id_usuario) REFERENCES Usuario (id_usuario),
     FOREIGN KEY (id_insumo) REFERENCES Insumo (id_insumo)
 )`);

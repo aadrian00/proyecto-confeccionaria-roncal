@@ -7,12 +7,12 @@ const db = new sqlite3.Database("./database.sqlite", (err) => {
   }
 });
 
-db.run(`CREATE TABLE Insumo (
-    id_insumo INTEGER PRIMARY KEY AUTOINCREMENT,
-    nombre_insumo TEXT NOT NULL,
-    descripcion TEXT,
-    stock_actual INTEGER NOT NULL,
-    stock_minimo INTEGER NOT NULL
+db.run(`CREATE TABLE IF NOT EXISTS Usuario (
+    id_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    contraseña TEXT NOT NULL
+);
 )`);
 
 module.exports = db;

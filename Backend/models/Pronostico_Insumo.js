@@ -7,14 +7,11 @@ const db = new sqlite3.Database("./database.sqlite", (err) => {
   }
 });
 
-db.run(`CREATE TABLE Alertas (
-    id_alerta INTEGER PRIMARY KEY AUTOINCREMENT,
-    id_usuario INTEGER NOT NULL,
+db.run(`CREATE TABLE IF NOT EXISTS Pronostico_Insumo (
+    id_pronostico INTEGER PRIMARY KEY AUTOINCREMENT,
     id_insumo INTEGER NOT NULL,
-    tipo_alerta TEXT NOT NULL,
-    umbral INTEGER NOT NULL,
-    frecuencia TEXT NOT NULL,
-    FOREIGN KEY (id_usuario) REFERENCES Usuario (id_usuario),
+    fecha_pronostico DATETIME NOT NULL,
+    cantidad_pronosticada INTEGER NOT NULL,
     FOREIGN KEY (id_insumo) REFERENCES Insumo (id_insumo)
 )`);
 

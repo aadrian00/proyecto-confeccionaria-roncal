@@ -7,11 +7,14 @@ const db = new sqlite3.Database("./database.sqlite", (err) => {
   }
 });
 
-db.run(`CREATE TABLE Historial_Sesion (
-    id_historial_sesion INTEGER PRIMARY KEY AUTOINCREMENT,
+db.run(`CREATE TABLE IF NOT EXISTS Historial_Insumo (
+    id_historial_insumo INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_insumo INTEGER NOT NULL,
     id_usuario INTEGER NOT NULL,
-    fecha_inicio DATETIME NOT NULL,
-    fecha_cierre DATETIME,
+    cantidad INTEGER NOT NULL,
+    tipo_movimiento TEXT CHECK (tipo_movimiento IN ('ingreso', 'egreso')),
+    fecha DATETIME NOT NULL,
+    FOREIGN KEY (id_insumo) REFERENCES Insumo (id_insumo),
     FOREIGN KEY (id_usuario) REFERENCES Usuario (id_usuario)
 )`);
 
