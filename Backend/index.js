@@ -16,6 +16,7 @@ const notificacionesRoutes = require("./routes/notificacionesRoutes");
 const pronostico_insumoRoutes = require("./routes/pronostico_insumoRoutes");
 const reporte_semanalRoutes = require("./routes/reporte_semanalRoutes");
 const usuarioRoutes = require("./routes/usuarioRoutes");
+const loginRoutes = require("./routes/login");
 
 app.use("/Alertas", alertasRoutes);
 app.use("/Historial_Insumo", historial_insumoRoutes);
@@ -25,6 +26,7 @@ app.use("/Notificaciones", notificacionesRoutes);
 app.use("/Pronostico_Insumo", pronostico_insumoRoutes);
 app.use("/Reporte_Semanal", reporte_semanalRoutes);
 app.use("/Usuarios", usuarioRoutes);
+app.use("/login", loginRoutes);
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
