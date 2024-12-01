@@ -7,6 +7,11 @@ const cors = require('cors');
 const rutas = require('./routes/insumos');
 const Usuario = require('./models/Usuario');
 const { OAuth2Client } = require('google-auth-library');
+const Insumo = require('./models/Insumo');
+const nodemailer = require('nodemailer');
+const sequelize = require('./database');
+const { Op } = require('sequelize');  // Asegúrate de importar 'Op' de Sequelize
+
 
 
 
@@ -171,34 +176,6 @@ app.post('/refresh-token', async (req, res) => {
   }
 });
 
-/*app.post('/api/auth/google', async (req, res) => {
-  const { idToken } = req.body; // Recibe el idToken desde el frontend
-
-  try {
-    // Verificar el idToken con Google
-    const ticket = await oauth2Client.verifyIdToken({
-      idToken: idToken,
-      audience: credentials.web.client_id, // Verifica que el token corresponda a tu cliente de Google
-    });
-
-    const payload = ticket.getPayload();
-    console.log(payload);
-    const userId = payload.sub; // El ID del usuario
-
-    // Aquí puedes crear un JWT para la sesión del usuario
-    const jwtToken = jwt.sign({ userId }, 'your-secret-key', { expiresIn: '1h' });
-
-    // Responder con el JWT al frontend
-    res.json({
-      success: true,
-      token: jwtToken, // Envia el token al frontend para almacenar en localStorage
-    });
-  } catch (error) {
-    console.error('Error al verificar el idToken:', error);
-    res.status(400).json({ success: false, message: 'Error de autenticación con Google' });
-  }
-});*/
-
 // Asegúrate de que los tokens se configuren correctamente en oauth2Client
 const tokens1 = JSON.parse(fs.readFileSync(tokensFilePath));  // o el lugar donde guardes los tokens
 if (tokens1 && tokens1.access_token) {
@@ -212,6 +189,84 @@ if (tokens1 && tokens1.access_token) {
 app.get('/login-google', checkGoogleAuth, (req, res) => {
   res.send('Ruta protegida con autenticación de Google');
 });
+
+
+// Configuración de nodemailer con el servicio de Gmail
+const transporter = nodemailer.createTransport({
+  service: 'gmail', // Puedes usar otro servicio de correo
+  auth: {
+    user: 'juegosdecompu12@gmail.com', // Tu correo de Gmail
+    pass: 'djqa pwbu kbcq afjz', // Usa una contraseña de aplicación si tienes habilitada la autenticación de dos factores
+  },
+});
+
+// Función para enviar el correo
+const enviarCorreo = async (destinatario, asunto, contenido) => {
+  const mailOptions = {
+    from: 'juegosdecompu12@gmail.com',
+    to: destinatario,
+    subject: asunto,
+    text: contenido,  // Correo en formato texto
+    html: `<strong>${contenido}</strong>`,  // Correo en formato HTML (opcional)
+  };
+
+  try {
+    // Enviar correo
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Correo enviado: ', info.response);
+  } catch (error) {
+    console.error('Error al enviar el correo:', error);
+  }
+};
+
+// Función para verificar el stock y enviar correo
+const verificarStock = async () => {
+  // Simulando la lógica de verificación del stock y el envío de correo
+  try {
+    // Obtener todos los usuarios
+    const usuarios = await Usuario.findAll(); // Asumiendo que tienes un modelo User en Sequelize
+
+    const insumosConBajoStock = await Insumo.findAll({
+      where: {
+        [Op.and]: [
+          sequelize.where(sequelize.col('stock_actual'), '<', sequelize.col('stock_minimo')), // Condición de bajo stock
+          { notificado: 0 }  // Condición de que no se haya notificado
+        ]
+      }
+    });
+
+    // Si hay insumos con bajo stock y no notificados, se envía un correo a todos los usuarios y se actualiza el campo notificado
+    if (insumosConBajoStock.length > 0) {
+      const asunto = 'Alerta de bajo stock';
+      const contenido = `Los siguientes insumos tienen bajo stock: ${insumosConBajoStock.map(insumo => insumo.nombre_insumo).join(', ')}`;
+
+      // Enviar correo a todos los usuarios
+      for (const usuario of usuarios) {
+        const destinatario = usuario.email; // Asegúrate de que cada usuario tenga un campo "email"
+        await enviarCorreo(destinatario, asunto, contenido);
+      }
+
+      // Actualizar el campo 'notificado' a 1 para los insumos con bajo stock
+      for (const insumo of insumosConBajoStock) {
+        await insumo.update({
+          notificado: 1,
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error al verificar el stock o al obtener insumos:', error);
+  }
+};
+
+
+// Programar la ejecución periódica (cada minuto en este caso)
+const iniciarVerificacionAutomatica = () => {
+  // Ejecutar cada minuto (60000 ms)
+  setInterval(verificarStock, 60000);
+};
+
+// Iniciar la verificación automática
+iniciarVerificacionAutomatica();
 
 
 // Otras rutas de la aplicación...
