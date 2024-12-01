@@ -12,7 +12,8 @@ db.run(`CREATE TABLE IF NOT EXISTS Insumo (
     nombre_insumo TEXT NOT NULL,
     descripcion TEXT,
     stock_actual INTEGER NOT NULL,
-    stock_minimo INTEGER NOT NULL
+    stock_minimo INTEGER NOT NULL,
+    notificado BOOLEAN NOT NULL DEFAULT 0
 )`);
 
 module.exports = db;

@@ -18,7 +18,7 @@ router.post("/", (req, res) => {
       if (err) {
        res.status(400).json({ error: err.message });
       } else {
-       res.json({ id: this.lastID });
+      res.json({ id: this.lastID });
       }
      }
     );
@@ -28,7 +28,7 @@ router.post("/", (req, res) => {
 
 router.get("/", (req, res) => {
 
-    db.all("SELECT * FROM Insumos", [], (err, rows) => {
+    db.all("SELECT * FROM Insumo", [], (err, rows) => {
    
      if (err) {
    
@@ -46,9 +46,11 @@ router.get("/", (req, res) => {
 
 // Obtener insumos por ID
 
-router.get("/", (req, res) => {
+router.get("/:id", (req, res) => {
 
-    db.all("SELECT id_insumo FROM Insumos", [], (err, rows) => {
+    const id_insumo = req.params.id;  // Obtiene el ID del insumo de la URL  
+
+    db.get(`SELECT * FROM Insumo WHERE id_insumo = ?`, [id_insumo], (err, row) => {
    
      if (err) {
    
@@ -56,7 +58,7 @@ router.get("/", (req, res) => {
    
      } else {
    
-      res.json({ data: rows });
+      res.json({ data: row });
    
      }
    
@@ -86,7 +88,7 @@ router.put("/:id_insumo", (req, res) => {
 
 router.delete("/:id_insumo", (req, res) => {
     const { id_insumo } = req.params;
-    db.run("DELETE FROM Insumo WHERE id_insumo = ?", id_insumo, function (err) {
+    db.run("DELETE FROM Insumo WHERE id_insumo = ?", [id_insumo], function (err) {
       if (err) {
         res.status(400).json({ error: err.message });
       } else {
