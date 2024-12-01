@@ -6,7 +6,6 @@ import ConfirmModal from '../Components/ConfirmacionModal.component'; // Importa
 const EditarInsumoPage = () => {
   const { id } = useParams(); // Obtener el ID del insumo desde la URL
   const [nombre, setNombre] = useState('');
-  const [cantidad, setCantidad] = useState('');
   const [stock_actual, setStockActual] = useState('');
   const [stock_minimo, setStockMinimo] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -17,17 +16,20 @@ const EditarInsumoPage = () => {
   useEffect(() => {
     const fetchInsumo = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/insumos/${id}`);
+        const response = await fetch(`http://localhost:3001/Insumo/${id}`);
         const result = await response.json();
-        console.log(result);
-        const insumo = result; // Suponiendo que los datos están en `data`
-        setNombre(insumo.nombre_insumo);
-        setDescripcion(insumo.descripcion);
-        setStockActual(insumo.stock_actual);
-        setStockMinimo(insumo.stock_minimo);
-
+        if (result) {
+          setNombre(result.nombre_insumo || '');
+          setDescripcion(result.descripcion || '');
+          setStockActual(result.stock_actual || '');
+          setStockMinimo(result.stock_minimo || '');
+        } else {
+          console.error('El insumo no fue encontrado:', result);
+          setMessage({ text: 'Error: El insumo no existe.', type: 'danger' });
+        }
       } catch (error) {
         console.error('Error al cargar el insumo:', error);
+        setMessage({ text: 'Error al cargar el insumo.', type: 'danger' });
       }
     };
 
@@ -35,7 +37,7 @@ const EditarInsumoPage = () => {
   }, [id]);
 
   // Manejar la actualización del insumo
-  const handleSubmit = async (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
     setShowModal(true); // Mostrar el modal de confirmación
   };
@@ -44,7 +46,7 @@ const EditarInsumoPage = () => {
   const confirmUpdate = async () => {
     try {
       const nombre_insumo = nombre;
-      const response = await fetch(`http://localhost:5000/api/insumos/${id}`, {
+      const response = await fetch(`http://localhost:3001/Insumo/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nombre_insumo, descripcion, stock_actual, stock_minimo }),
@@ -94,7 +96,7 @@ const EditarInsumoPage = () => {
           />
         </Form.Group>
 
-        <Form.Group className="mb-3" controlId="cantidad">
+        <Form.Group className="mb-3" controlId="stock_actual">
           <Form.Label>Stock Actual</Form.Label>
           <Form.Control
             type="number"
@@ -104,8 +106,8 @@ const EditarInsumoPage = () => {
           />
         </Form.Group>
 
-        <Form.Group className="mb-3" controlId="cantidad">
-          <Form.Label>Sotck Mínimo</Form.Label>
+        <Form.Group className="mb-3" controlId="stock_minimo">
+          <Form.Label>Stock Mínimo</Form.Label>
           <Form.Control
             type="number"
             value={stock_minimo}

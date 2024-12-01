@@ -8,7 +8,7 @@ const CrearInsumosPage = () => {
   const [descripcion, setDescripcion] = useState('');
   const [stock_actual, setStockActual] = useState('');
   const [stock_minimo, setStockMinimo] = useState('');
-  const [insumos, setInsumos] = useState([]);
+  const [insumos, setInsumos] = useState([]); // Inicializado como array vacío
   const [message, setMessage] = useState('');
   const [showModal, setShowModal] = useState(false); // Estado para controlar el modal
   const navigate = useNavigate();
@@ -17,12 +17,15 @@ const CrearInsumosPage = () => {
   useEffect(() => {
     const fetchInsumos = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/insumos');
+        const response = await fetch('http://localhost:3001/Insumo');
         const result = await response.json();
-        setInsumos(result); // Asumiendo que los insumos están en el campo 'insumos'
-        console.log(insumos);
+        if (Array.isArray(result)) {
+          setInsumos(result); // Asegúrate de que sea un array
+        } else {
+          console.error('La respuesta no es un array:', result);
+          setInsumos([]);
+        }
       } catch (error) {
-        console.log("Se está llegando aquí");
         console.error('Error al cargar los insumos:', error);
       }
     };
@@ -41,7 +44,7 @@ const CrearInsumosPage = () => {
     setShowModal(false);
     try {
       const nombre_insumo = nombre;
-      const response = await fetch('http://localhost:5000/api/insumos', {
+      const response = await fetch('http://localhost:3001/Insumo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nombre_insumo, descripcion, stock_actual, stock_minimo }),
@@ -55,9 +58,8 @@ const CrearInsumosPage = () => {
         setMessage('Insumo creado con éxito.');
 
         // Actualiza la lista de insumos recargando la data
-        const updatedInsumos = await response.json();
-        console.log("Esta es la respuesta que me está dando", updatedInsumos);
-        setInsumos(prevInsumos => [...prevInsumos, updatedInsumos.insumo]);  // Recargar la lista de insumos desde la API
+        const updatedInsumo = await response.json();
+        setInsumos((prevInsumos) => [...prevInsumos, updatedInsumo.insumo]);
       } else {
         setMessage('Error al crear el insumo.');
       }
@@ -70,19 +72,17 @@ const CrearInsumosPage = () => {
   // Manejar la eliminación de un insumo
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/insumos/${id}`, {
+      const response = await fetch(`http://localhost:3001/Insumo/${id}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
-        // Actualiza la lista de insumos después de eliminar uno
-        setInsumos(insumos.filter((insumo) => insumo.id_insumo !== id));
+        setInsumos((insumos) => insumos.filter((insumo) => insumo.id_insumo !== id));
         setMessage('Insumo eliminado con éxito.');
       } else {
         setMessage('Error al eliminar el insumo.');
       }
     } catch (error) {
-      console.log(id);
       console.error('Error al eliminar el insumo:', error);
       setMessage('Error al eliminar el insumo.');
     }
@@ -147,23 +147,28 @@ const CrearInsumosPage = () => {
 
       <h3 className="text-center mt-5">Lista de Insumos</h3>
 
-      {insumos.map((insumo) => (
-        <div key={insumo.id_insumo} className="p-3 mb-2 border rounded d-flex justify-content-between align-items-center">
-          <div>
-            <strong>Nombre:</strong> {insumo.nombre_insumo} <br />
-            <strong>Descripción:</strong> {insumo.descripcion || 'N/A'} <br />
-            <strong>Stock Actual:</strong> {insumo.stock_actual} <br />
-            <strong>Stock Minimo:</strong> {insumo.stock_minimo} <br />
-
-          </div>
-          <div>
-            <Button variant="warning" onClick={() => handleEdit(insumo.id_insumo)} className="me-2">
-              Editar
-            </Button>
-            <Button variant="danger" onClick={() => handleDelete(insumo.id_insumo)}>
-              Eliminar
-            </Button>
-          </div>
+      {Array.isArray(insumos) && insumos.map((insumo) => (
+        <div key={insumo?.id_insumo || Math.random()} className="p-3 mb-2 border rounded d-flex justify-content-between align-items-center">
+          {insumo && insumo.nombre_insumo ? (
+            <>
+              <div>
+                <strong>Nombre:</strong> {insumo.nombre_insumo} <br />
+                <strong>Descripción:</strong> {insumo.descripcion || 'N/A'} <br />
+                <strong>Stock Actual:</strong> {insumo.stock_actual} <br />
+                <strong>Stock Minimo:</strong> {insumo.stock_minimo} <br />
+              </div>
+              <div>
+                <Button variant="warning" onClick={() => handleEdit(insumo.id_insumo)} className="me-2">
+                  Editar
+                </Button>
+                <Button variant="danger" onClick={() => handleDelete(insumo.id_insumo)}>
+                  Eliminar
+                </Button>
+              </div>
+            </>
+          ) : (
+            <div>Datos del insumo inválidos</div>
+          )}
         </div>
       ))}
 
