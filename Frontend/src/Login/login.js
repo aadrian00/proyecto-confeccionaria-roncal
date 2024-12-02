@@ -22,6 +22,7 @@ function Login() {
       if (response.data.success) {
         // Si la autenticación es exitosa, almacenar el token
         localStorage.setItem('authToken', response.data.token);
+        localStorage.setItem('access_token', response.data.token);
         navigate('/inicio');
       } else {
         setErrorMessage('Usuario o contraseña incorrectos');

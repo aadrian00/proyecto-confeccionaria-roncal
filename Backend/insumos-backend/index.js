@@ -8,8 +8,6 @@ const rutas = require('./routes/insumos');
 const Usuario = require('./models/Usuario');
 const { OAuth2Client } = require('google-auth-library');
 
-
-
 app.use(cors({
   origin: 'http://localhost:3000', // Permite solicitudes solo desde el frontend
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos permitidos
@@ -22,7 +20,6 @@ app.use((req, res, next) => {
   next();
 });
 
-
 app.use(express.json()); // Middleware para procesar JSON en las solicitudes
 
 
@@ -33,7 +30,7 @@ let tokens; // Inicializa la variable como indefinida al inicio del archivo
 
 const tokensFilePath = path.join(__dirname, 'tokens.json'); 
 
-/*
+
 const credentialsPath = path.join(__dirname, './client_secret_601410416648-60hmjausm1su3bgm93u3n68ml9h47tde.apps.googleusercontent.com (4).json'); // Ruta del archivo de credenciales
 let credentials = {};
 
@@ -199,7 +196,6 @@ app.post('/refresh-token', async (req, res) => {
   }
 });*/
 
-/*
 // Asegúrate de que los tokens se configuren correctamente en oauth2Client
 const tokens1 = JSON.parse(fs.readFileSync(tokensFilePath));  // o el lugar donde guardes los tokens
 if (tokens1 && tokens1.access_token) {
@@ -214,7 +210,6 @@ app.get('/login-google', checkGoogleAuth, (req, res) => {
   res.send('Ruta protegida con autenticación de Google');
 });
 
-*/
 
 // Otras rutas de la aplicación...
 app.get('/', (req, res) => {
