@@ -75,7 +75,7 @@ function Login() {
                                     </button>
                                 </div>
                                 <div className="text-center mt-4">
-                                <button onClick={onClick}>
+                                <button onClick={onClick} className="btn btn-warning">
                                     Iniciar Sesión con Google
                                 </button>
                                 </div>

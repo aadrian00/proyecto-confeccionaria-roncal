@@ -52,7 +52,8 @@ function MainNav() {
      localStorage.removeItem('access_token');
      localStorage.removeItem('authToken')
      localStorage.removeItem('email');
-  
+  }
+
   const dibujarConfigModal = () => {
     return(
       <div class="modal fade" id="configModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
