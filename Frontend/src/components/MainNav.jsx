@@ -15,7 +15,27 @@ function MainNav() {
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
-    setIsAuthenticated(!!token);
+    if (token) {
+      setIsAuthenticated(true);  // El usuario está autenticado
+    } else {
+      setIsAuthenticated(false);  // No hay token, no autenticado
+    }
+  }, []);  // Solo cuando se monta el componente
+
+  // Actualiza el estado cada vez que se cambie el token en localStorage
+  useEffect(() => {
+    // Esto va a escuchar cambios en el localStorage directamente
+    const interval = setInterval(() => {
+      const token = localStorage.getItem('access_token');
+      const token1 = localStorage.getItem('authToken');
+      if (token || token1) {
+        setIsAuthenticated(true); // El token existe
+      } else {
+        setIsAuthenticated(false); // El token no existe
+      }
+    }, 1000); // Verifica cada segundo
+
+    return () => clearInterval(interval);  // Limpiar intervalo cuando el componente se desmonta
   }, []);
 
   useEffect(() => {
@@ -28,11 +48,10 @@ function MainNav() {
   }, []);
 
   const cerrarSesion = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('email');
-    setIsAuthenticated(false);
-    window.location.href = '/login';
-  };
+     // Elimina el token del localStorage (o sessionStorage, dependiendo de donde lo guardes)
+     localStorage.removeItem('access_token');
+     localStorage.removeItem('authToken')
+     localStorage.removeItem('email');
   
   const dibujarConfigModal = () => {
     return(

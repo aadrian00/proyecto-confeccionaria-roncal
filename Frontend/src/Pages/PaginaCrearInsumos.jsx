@@ -11,13 +11,17 @@ const CrearInsumosPage = () => {
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
 
+  // Cargar insumos desde la API al montar el componente
   useEffect(() => {
     const fetchInsumos = async () => {
+      let email = localStorage.getItem('email'); // El email también debe estar guardado
+      console.log(email);
       try {
-        const response = await fetch('http://localhost:5000/api/insumos');
+        const response = await fetch('http://localhost:5000/Insumo')
         const result = await response.json();
-        setInsumos(result);
+        setInsumos(result.data); // Asumiendo que los insumos están en el campo 'insumos'
       } catch (error) {
+        console.log("Se está llegando aquí");
         console.error('Error al cargar los insumos:', error);
       }
     };
@@ -25,28 +29,40 @@ const CrearInsumosPage = () => {
     fetchInsumos();
   }, []);
 
+  console.log(insumos);
+
+  // Mostrar el modal antes de confirmar la creación
   const handleShowModal = (event) => {
     event.preventDefault();
     setShowModal(true);
   };
 
+  // Confirmar y enviar los datos a la API
   const confirmSubmit = async () => {
+    let email = localStorage.getItem('email'); // El email también debe estar guardado
     setShowModal(false);
     try {
-      const response = await fetch('http://localhost:5000/api/insumos', {
+      const nombre_insumo = nombre;
+      console.log(nombre_insumo);
+      const response = await fetch('http://localhost:5000/Insumo', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre, descripcion, stock_actual, stock_minimo }),
+        headers: { 'Content-Type': 'application/json'         },
+        body: JSON.stringify({ nombre_insumo, descripcion, stock_actual, stock_minimo }),
       });
 
       if (response.ok) {
-        const updatedInsumos = await response.json();
-        setInsumos((prevInsumos) => [...prevInsumos, updatedInsumos.insumo]);
-        setMessage('Insumo creado con éxito.');
         setNombre('');
         setDescripcion('');
         setStockActual('');
         setStockMinimo('');
+        setMessage('Insumo creado con éxito.');
+
+        // Actualiza la lista de insumos recargando la data
+        const updatedInsumos = { nombre_insumo, descripcion, stock_actual, stock_minimo };
+        console.log(updatedInsumos);
+        console.log("Esta es la respuesta que me está dando", updatedInsumos);
+        setInsumos(prevInsumos => [...prevInsumos, updatedInsumos]);  // Recargar la lista de insumos desde la API
+        console.log(insumos);
       } else {
         setMessage('Error al crear el insumo.');
       }
@@ -56,24 +72,31 @@ const CrearInsumosPage = () => {
     }
   };
 
+  // Manejar la eliminación de un insumo
   const handleDelete = async (id) => {
+    let email = localStorage.getItem('email'); // El email también debe estar guardado
+    console.log(email);
     try {
-      const response = await fetch(`http://localhost:5000/api/insumos/${id}`, {
+      const response = await fetch(`http://localhost:5000/Insumo/${id}`, {
         method: 'DELETE',
+        body: JSON.stringify({ email }),
       });
 
       if (response.ok) {
+        // Actualiza la lista de insumos después de eliminar uno
         setInsumos(insumos.filter((insumo) => insumo.id_insumo !== id));
         setMessage('Insumo eliminado con éxito.');
       } else {
         setMessage('Error al eliminar el insumo.');
       }
     } catch (error) {
+      console.log(id);
       console.error('Error al eliminar el insumo:', error);
       setMessage('Error al eliminar el insumo.');
     }
   };
 
+  // Redirigir a la página de edición de insumo
   const handleEdit = (id) => {
     navigate(`/editar-insumo/${id}`);
   };
@@ -149,7 +172,7 @@ const CrearInsumosPage = () => {
           </div>
         ))
       ) : (
-        <div className="border rounded p-3 text-center bg-light text-danger">Error al cargar los insumos</div>
+        <div className="border rounded p-3 text-center bg-light text-danger">No hay insumos</div> // Si no hay insumos, mostrar este mensaje
       )}
       
 

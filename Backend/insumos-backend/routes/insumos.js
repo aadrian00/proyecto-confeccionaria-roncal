@@ -1,10 +1,8 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const Insumo = require('../models/Insumo');
 const router = express.Router();
-const { oauth2Client } = require('../index');
-const { google } = require('googleapis');  // Asegúrate de que esta línea esté presente
-
+const { google } = require('googleapis');
+const Insumo = require('../models/Insumo');
 
 
 // Middleware para verificar autenticación (usando JWT)
@@ -86,10 +84,7 @@ router.put('/insumos/:id_insumo', async (req, res) => {
     insumo.descripcion = descripcion;
     insumo.stock_actual = stock_actual;
     insumo.stock_minimo = stock_minimo;
-    await insumo.save();
-
-    verificarStock(insumo);
-    
+    await insumo.save();    
     res.status(200).json({ message: 'Insumo actualizado exitosamente', insumo });
   }
   } catch (error) {
@@ -101,10 +96,7 @@ router.put('/insumos/:id_insumo', async (req, res) => {
 // Ruta para eliminar un insumo
 router.delete('/insumos/:id_insumo', async (req, res) => {
   const { id_insumo } = req.params;
-  const {email} = req.body;
   try {
-    if(email != null)
-    {
     const insumo = await Insumo.findByPk(id_insumo);
     if (!insumo) {
       return res.status(404).json({ message: 'Insumo no encontrado' });
@@ -112,7 +104,7 @@ router.delete('/insumos/:id_insumo', async (req, res) => {
 
     await insumo.destroy();
     res.status(200).json({ message: 'Insumo eliminado exitosamente' });
-  }
+
   } catch (error) {
     console.error('Error al eliminar el insumo:', error);
     res.status(500).json({ message: 'Error al eliminar el insumo' });
@@ -146,46 +138,5 @@ router.get('/check-auth', isAuthenticated, (req, res) => {
 router.get('/logout', (req, res) => {
   res.json({ message: 'Logout exitoso' });
 });
-
-// Función para enviar correo
-const enviarCorreo = async (subject, body) => {
-  const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
-
-  const mensaje = [
-    'Content-Type: text/plain; charset="UTF-8"\n',
-    'MIME-Version: 1.0\n',
-    `From: "Jean Pierre" <20191946@aloe.ulima.edu.pe>\n`,  // Cambia el correo de origen
-    'To: 20191946@aloe.ulima.edu.pe\n',  // Cambia el correo de destino
-    `Subject: ${subject}\n`,
-    '\n',
-    body
-  ].join('');
-
-  const base64EncodedMessage = Buffer.from(mensaje).toString('base64');
-
-  console.log("Se alista para enviar el correo");
-
-  try {
-    await gmail.users.messages.send({
-      userId: 'me',
-      requestBody: {
-        raw: base64EncodedMessage
-      },
-    });
-    console.log('Correo enviado');
-  } catch (error) {
-    console.error('Error al enviar el correo:', error);
-  }
-};
-
-// Función de verificación de stock
-const verificarStock = (insumo) => {
-  if (insumo.stock_actual <= insumo.stock_minimo) {
-    const subject = `Stock bajo para el insumo ${insumo.nombre_insumo}`;
-    const body = `El stock actual del insumo ${insumo.nombre_insumo} es de ${insumo.stock_actual}, lo cual es inferior o igual al stock mínimo de ${insumo.STOCK_MINIMO}. Es necesario reabastecer el inventario.`;
-    console.log("Está por mandar el correo");
-    enviarCorreo(subject, body);
-  }
-};
 
 module.exports = router;

@@ -24,10 +24,10 @@ const EditarInsumoPage = () => {
   useEffect(() => {
     const fetchInsumo = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/insumos/${id}`);
+        const response = await fetch(`http://localhost:5000/Insumo/${id}`);
         const result = await response.json();
         console.log(result);
-        const insumo = result;
+        const insumo = result.data; // Suponiendo que los datos están en `data`
         setNombre(insumo.nombre_insumo);
         setDescripcion(insumo.descripcion);
         setStockActual(insumo.stock_actual);
@@ -41,7 +41,7 @@ const EditarInsumoPage = () => {
   }, [id]);
 
   // Manejar la actualización del insumo
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     setShowModal(true); // Mostrar el modal de confirmación
   };
@@ -50,10 +50,11 @@ const EditarInsumoPage = () => {
   const confirmUpdate = async () => {
     try {
       const nombre_insumo = nombre;
-      const response = await fetch(`http://localhost:5000/api/insumos/${id}`, {
+      const response = await fetch(`http://localhost:5000/Insumo/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre_insumo, descripcion, stock_actual, stock_minimo, email }),
+        headers: { 'Content-Type': 'application/json',
+         },
+        body: JSON.stringify({ nombre_insumo, descripcion, stock_actual, stock_minimo, email}),
       });
 
       if (response.ok) {

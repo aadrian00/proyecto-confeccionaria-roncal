@@ -3,13 +3,12 @@ import 'bootstrap/dist/js/bootstrap.bundle.js'
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import MainNav from './Components/MainNav';
-import Login from './Login/login';
-import Inicio from './Pages/inicio';
+import Login from "./Components/Login";
+import Inicio from './Pages/Inicio'; // Sin la mayúscula en 'I'
 import Reporte from './Pages/Reporte';
 import CrearInsumosPage from './Pages/PaginaCrearInsumos';
 import EditarInsumoPage from './Pages/PaginaEditarInsumos';
 import Historico from './Pages/Historico';
-import ConfirmModal from './Components/ConfirmacionModal.component'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

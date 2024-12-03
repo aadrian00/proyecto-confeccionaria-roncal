@@ -1,17 +1,16 @@
-const express = require('express');
+const express = require("express");
+const cors = require("cors");
+const app = express();
 const fs = require('fs');
 const { google } = require('googleapis');
 const path = require('path');
-const app = express();
-const cors = require('cors');
-const rutas = require('./routes/insumos');
-const Usuario = require('./models/Usuario');
 const { OAuth2Client } = require('google-auth-library');
-const Insumo = require('./models/Insumo');
 const nodemailer = require('nodemailer');
-const sequelize = require('./database');
-const { Op } = require('sequelize');  // Asegúrate de importar 'Op' de Sequelize
+const db_usuario = require('./models/Usuario');
+const db_insumo = require('./models/Insumo');
+const sqlite3 = require("sqlite3").verbose();
 
+const PORT = 5000;
 
 app.use(cors({
   origin: 'http://localhost:3000', // Permite solicitudes solo desde el frontend
@@ -25,16 +24,32 @@ app.use((req, res, next) => {
   next();
 });
 
+// Rutas existentes
+
+const alertasRoutes = require("./routes/alertasRoutes");
+const historial_insumoRoutes = require("./routes/historial_insumoRoutes");
+const historial_sesionRoutes = require("./routes/historial_sesionRoutes");
+const insumoRoutes = require("./routes/insumoRoutes");
+const notificacionesRoutes = require("./routes/notificacionesRoutes");
+const pronostico_insumoRoutes = require("./routes/pronostico_insumoRoutes");
+const reporte_semanalRoutes = require("./routes/reporte_semanalRoutes");
+const usuarioRoutes = require("./routes/usuarioRoutes");
+const loginRoutes = require("./routes/login");
+
+
 app.use(express.json()); // Middleware para procesar JSON en las solicitudes
 
-
-app.use('/api', rutas);
-
+app.use("/Alertas", alertasRoutes);
+app.use("/Historial_Insumo", historial_insumoRoutes);
+app.use("/Historial_Sesion", historial_sesionRoutes);
+app.use("/Insumo", insumoRoutes);
+app.use("/Notificaciones", notificacionesRoutes);
+app.use("/Pronostico_Insumo", pronostico_insumoRoutes);
+app.use("/Reporte_Semanal", reporte_semanalRoutes);
+app.use("/Usuarios", usuarioRoutes);
+app.use("/login", loginRoutes);
 
 let tokens; // Inicializa la variable como indefinida al inicio del archivo
-
-const tokensFilePath = path.join(__dirname, 'tokens.json'); 
-
 
 const credentialsPath = path.join(__dirname, './client_secret_601410416648-60hmjausm1su3bgm93u3n68ml9h47tde.apps.googleusercontent.com (4).json'); // Ruta del archivo de credenciales
 let credentials = {};
@@ -80,9 +95,9 @@ app.get('/auth/google', (req, res) => {
   res.send('Ya estás autenticado');
 });
 
-
+// Ruta para el callback de OAuth2
 app.get('/oauth2callback', async (req, res) => {
-  const code = req.query.code;  // El código de autorización que Google envía
+  const code = req.query.code; // El código de autorización enviado por Google
 
   if (!code) {
     return res.status(400).send('Authorization code not found.');
@@ -102,9 +117,10 @@ app.get('/oauth2callback', async (req, res) => {
       auth: oauth2Client,
     });
 
+    // Obtener la información del usuario
     const userInfo = await oauth2.userinfo.get({
       headers: {
-        Authorization: `Bearer ${accessToken}`,  // Pasa el access_token aquí
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
@@ -113,25 +129,50 @@ app.get('/oauth2callback', async (req, res) => {
     const email = userInfo.data.email;
     const nombre = userInfo.data.name;
 
-    let usuario = await Usuario.findOne({ where: { email } });
+    // Consultar si el usuario ya existe en la base de datos
+    db_usuario.get(
+      `SELECT * FROM Usuario WHERE email = ?`,
+      [email],
+      async (err, usuario) => {
+        if (err) {
+          console.error('Error al buscar usuario:', err);
+          return res.status(500).send('Error al buscar usuario.');
+        }
 
-    if (!usuario) {
-      // Si el usuario no existe, lo creamos
-      usuario = await Usuario.create({
-        nombre: nombre,
-        email: email,
-        contraseña: null,  // No necesitamos contraseña si se registra con Google
-        refresco: newTokens.refresh_token,  // Guardamos el refresh_token
-      });
-    } else {
-      // Si el usuario ya existe, actualizamos el refresh_token
-      usuario.refresco = newTokens.refresh_token;
-      await usuario.save();
-    }
+        if (!usuario) {
+          // Si el usuario no existe, lo creamos
+          db_usuario.run(
+            `INSERT INTO Usuario (nombre, email, contrasena, refresco) VALUES (?, ?, NULL, ?)`,
+            [nombre, email, newTokens.refresh_token || 0],
+            function (err) {
+              if (err) {
+                console.error('Error al crear usuario:', err);
+                return res.status(500).send('Error al crear usuario.');
+              }
+              console.log('Usuario creado con ID:', this.lastID);
+            }
+          );
+        } else {
+          // Si el usuario ya existe, actualizamos el refresh_token
+          db_usuario.run(
+            `UPDATE Usuario SET refresco = ? WHERE email = ?`,
+            [newTokens.refresh_token || 0, email],
+            (err) => {
+              if (err) {
+                console.error('Error al actualizar usuario:', err);
+                return res.status(500).send('Error al actualizar usuario.');
+              }
+              console.log('Usuario actualizado:', email);
+            }
+          );
+        }
 
-    // Redirigir al usuario a la página principal o a su perfil
-    return res.redirect(`http://localhost:3000/inicio?token=${newTokens.access_token}&email=${userInfo.data.email}`);
-
+        // Redirigir al usuario a la página principal o a su perfil
+        return res.redirect(
+          `http://localhost:3000/inicio?token=${newTokens.access_token}&email=${userInfo.data.email}`
+        );
+      }
+    );
   } catch (error) {
     console.error('Error al obtener los tokens:', error);
     return res.status(500).send('Error en la autenticación');
@@ -173,15 +214,6 @@ app.post('/refresh-token', async (req, res) => {
   }
 });
 
-// Asegúrate de que los tokens se configuren correctamente en oauth2Client
-const tokens1 = JSON.parse(fs.readFileSync(tokensFilePath));  // o el lugar donde guardes los tokens
-if (tokens1 && tokens1.access_token) {
-  oauth2Client.setCredentials(tokens1);  // Configura el oauth2Client con los tokens
-} else {
-  console.error('No se encontraron tokens de acceso.');
-  // Llama a una ruta de reautenticación si es necesario
-}
-
 // Definir la ruta protegida
 app.get('/login-google', checkGoogleAuth, (req, res) => {
   res.send('Ruta protegida con autenticación de Google');
@@ -216,45 +248,69 @@ const enviarCorreo = async (destinatario, asunto, contenido) => {
   }
 };
 
-// Función para verificar el stock y enviar correo
 const verificarStock = async () => {
-  // Simulando la lógica de verificación del stock y el envío de correo
   try {
     // Obtener todos los usuarios
-    const usuarios = await Usuario.findAll(); // Asumiendo que tienes un modelo User en Sequelize
-
-    const insumosConBajoStock = await Insumo.findAll({
-      where: {
-        [Op.and]: [
-          sequelize.where(sequelize.col('stock_actual'), '<', sequelize.col('stock_minimo')), // Condición de bajo stock
-          { notificado: 0 }  // Condición de que no se haya notificado
-        ]
+    db_usuario.all(`SELECT * FROM Usuario`, [], (err, usuarios) => {
+      if (err) {
+        console.error("Error al obtener usuarios:", err);
+        return;
       }
+
+      // Obtener insumos con bajo stock y no notificados
+      db_insumo.all(
+        `SELECT * FROM Insumo WHERE stock_actual < stock_minimo AND notificado = 0`,
+        [],
+        (err, insumosConBajoStock) => {
+          if (err) {
+            console.error("Error al obtener insumos:", err);
+            return;
+          }
+
+          // Si hay insumos con bajo stock y no notificados
+          if (insumosConBajoStock.length > 0) {
+            const asunto = "Alerta de bajo stock";
+            const contenido = `Los siguientes insumos tienen bajo stock: ${insumosConBajoStock
+              .map((insumo) => insumo.nombre_insumo)
+              .join(", ")}`;
+
+            // Enviar correo a todos los usuarios
+            usuarios.forEach((usuario) => {
+              const destinatario = usuario.email; // Campo "email" en la tabla Usuario
+              enviarCorreo(destinatario, asunto, contenido)
+                .then(() => {
+                  console.log(`Correo enviado a: ${destinatario}`);
+                })
+                .catch((error) => {
+                  console.error(`Error al enviar correo a ${destinatario}:`, error);
+                });
+            });
+
+            // Actualizar el campo 'notificado' a 1 para los insumos
+            insumosConBajoStock.forEach((insumo) => {
+              db_insumo.run(
+                `UPDATE Insumo SET notificado = 1 WHERE id_insumo = ?`,
+                [insumo.id_insumo],
+                (err) => {
+                  if (err) {
+                    console.error(
+                      `Error al actualizar notificado para insumo ${insumo.id_insumo}:`,
+                      err
+                    );
+                  } else {
+                    console.log(`Insumo ${insumo.id_insumo} actualizado como notificado.`);
+                  }
+                }
+              );
+            });
+          }
+        }
+      );
     });
-
-    // Si hay insumos con bajo stock y no notificados, se envía un correo a todos los usuarios y se actualiza el campo notificado
-    if (insumosConBajoStock.length > 0) {
-      const asunto = 'Alerta de bajo stock';
-      const contenido = `Los siguientes insumos tienen bajo stock: ${insumosConBajoStock.map(insumo => insumo.nombre_insumo).join(', ')}`;
-
-      // Enviar correo a todos los usuarios
-      for (const usuario of usuarios) {
-        const destinatario = usuario.email; // Asegúrate de que cada usuario tenga un campo "email"
-        await enviarCorreo(destinatario, asunto, contenido);
-      }
-
-      // Actualizar el campo 'notificado' a 1 para los insumos con bajo stock
-      for (const insumo of insumosConBajoStock) {
-        await insumo.update({
-          notificado: 1,
-        });
-      }
-    }
   } catch (error) {
-    console.error('Error al verificar el stock o al obtener insumos:', error);
+    console.error("Error al verificar el stock o al enviar correos:", error);
   }
 };
-
 
 // Programar la ejecución periódica (cada minuto en este caso)
 const iniciarVerificacionAutomatica = () => {
@@ -266,12 +322,6 @@ const iniciarVerificacionAutomatica = () => {
 iniciarVerificacionAutomatica();
 
 
-// Otras rutas de la aplicación...
-app.get('/', (req, res) => {
-  res.send('Bienvenido a la aplicación');
-});
-
-// Iniciar el servidor
-app.listen(5000, () => {
-  console.log('Servidor corriendo en http://localhost:5000');
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
