@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { GoogleLogin } from 'react-google-login';
-import { Button } from 'react-bootstrap';
-
-
 
 function Login() {
   const [username, setUsername] = useState('');
@@ -26,6 +22,7 @@ function Login() {
       if (response.data.success) {
         // Si la autenticación es exitosa, almacenar el token
         localStorage.setItem('authToken', response.data.token);
+        localStorage.setItem('access_token', response.data.token);
         navigate('/inicio');
       } else {
         setErrorMessage('Usuario o contraseña incorrectos');
@@ -92,9 +89,9 @@ function Login() {
             required
           />
         </div>
-        <button type="submit" className="btn btn-success w-100">Login</button>
+        <button type="submit" className="btn btn-success w-100">Iniciar Sesión</button>
         <div className="text-center mt-4">
-          <button onClick={onClick}>
+          <button className='btn btn-warning w-100' onClick={onClick}>
             Iniciar Sesión con Google
           </button>
         </div>

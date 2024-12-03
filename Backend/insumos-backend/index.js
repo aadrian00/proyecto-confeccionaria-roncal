@@ -8,8 +8,6 @@ const rutas = require('./routes/insumos');
 const Usuario = require('./models/Usuario');
 const { OAuth2Client } = require('google-auth-library');
 
-
-
 app.use(cors({
   origin: 'http://localhost:3000', // Permite solicitudes solo desde el frontend
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos permitidos
@@ -21,7 +19,6 @@ app.use((req, res, next) => {
   res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
   next();
 });
-
 
 app.use(express.json()); // Middleware para procesar JSON en las solicitudes
 
