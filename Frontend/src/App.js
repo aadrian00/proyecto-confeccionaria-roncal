@@ -1,7 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.bundle.js'
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import MainNav from './Components/MainNav';
 import Login from './Login/login';
 import Inicio from './Pages/inicio';
@@ -12,17 +12,28 @@ import Historico from './Pages/Historico';
 import ConfirmModal from './Components/ConfirmacionModal.component'
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const token = localStorage.getItem('access_token');
+      setIsAuthenticated(!!token);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <Router>
       <MainNav/>
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={isAuthenticated ? <Navigate to="/inicio" replace/> : <Login/>} />
         <Route path="/inicio" element={<Inicio />} />
         <Route path="/reporte" element={<Reporte />} />
         <Route path="/historico" element={<Historico />} />
         <Route path="/crearInsumo" element={<CrearInsumosPage />}/>
         <Route path="/editar-insumo/:id" element={<EditarInsumoPage />} />
+        <Route path="*" element={isAuthenticated ? <Navigate to="/inicio" replace/> : <Navigate to="/login" replace/>}/>
       </Routes>
     </Router>
   );
